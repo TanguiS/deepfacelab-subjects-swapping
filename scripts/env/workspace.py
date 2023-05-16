@@ -19,10 +19,10 @@ class WorkspaceStr(enum.Enum):
 from scripts.SubjectLoader import Subject
 
 
-def create_workspace(subjects_path: Path, dim: int, quality: int) -> List[Subject]:
+def create_workspace(subjects_path: Path, dim: int, quality: int) -> None:
     subjects = []
     subjects_path.joinpath(WorkspaceStr.pretrain.value).mkdir(exist_ok=True)
-    subjects_path = [path for path in subjects_path.iterdir()]
+    subjects_path = [path for path in subjects_path.glob(WorkspaceStr.subject.value + "*")]
     for curr in subjects_path:
         for path in (curr.joinpath(WorkspaceStr.frames.value),
                      curr.joinpath(WorkspaceStr.aligned.value),
@@ -37,7 +37,6 @@ def create_workspace(subjects_path: Path, dim: int, quality: int) -> List[Subjec
             sub.mkdir(exist_ok=True)
             sub2 = sub.joinpath(WorkspaceStr.mask.value)
             sub2.mkdir(exist_ok=True)
-    return subjects
 
 
 def clean_workspace(subjects: List[Subject]) -> None:
@@ -49,7 +48,7 @@ def load_subjects(subjects_path: Path, dim: int, quality: int) -> List[Subject]:
     from tqdm import tqdm
 
     subjects = []
-    total = len([item for item in subjects_path.iterdir()])
-    for curr in tqdm(subjects_path.iterdir(), total=total, desc="loading subjects", miniters=1.0, unit="subjects/s"):
+    total = len([item for item in subjects_path.glob(WorkspaceStr.subject.value + "*")])
+    for curr in tqdm(subjects_path.glob(WorkspaceStr.subject.value + "*"), total=total, desc="loading subjects", miniters=1.0, unit="subjects/s"):
         subjects.append(Subject(curr, dim, quality))
     return subjects

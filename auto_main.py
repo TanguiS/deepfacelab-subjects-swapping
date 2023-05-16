@@ -14,7 +14,8 @@ def clean_workspace(subjects_dir: Path, dim_output_faces: int, png_quality: int)
 
 
 def extract(subjects_dir: Path, dim_output_faces: int, png_quality: int) -> None:
-    subjects = workspace.create_workspace(subjects_dir, dim_output_faces, png_quality)
+    workspace.create_workspace(subjects_dir, dim_output_faces, png_quality)
+    subjects = workspace.load_subjects(subjects_dir, dim_output_faces, png_quality)
     proxy_extract.launch(subjects, 'whole_face', dim_output_faces, png_quality)
 
 

@@ -76,7 +76,7 @@ def launch(subjects: List[Subject], face_type: str, image_size: int, jpeg_qualit
             continue
         else:
             subject.clean_alignment()
-        cut_video(subject.video())
+        # cut_video(subject.video())
         video_to_frames(subject.video(), subject.frames())
         extract_face(subject.frames(), subject.aligned(), face_type, image_size, jpeg_quality)
         sort_dir_by_hist(subject.frames())
