@@ -1,20 +1,22 @@
 from pathlib import Path
-from typing import Union, List
 
 from scripts import args_parser
-from scripts.env import workspace
+from scripts.workspace import workspace
 from scripts.train import proxy_train, face_swap
 from scripts.extract import proxy_extract, facet_pack, facet_unpack
-from scripts.env.workspace import WorkspaceStr
+from scripts.workspace.workspace import WorkspaceStr
 
+
+def videos_to_subjects(input_videos_dir: Path, output_subjects_dir: Path) -> None:
+    workspace.videos_to_subject(input_videos_dir, output_subjects_dir)
 
 def clean_workspace(subjects_dir: Path, dim_output_faces: int, png_quality: int) -> None:
     subjects = workspace.load_subjects(subjects_dir, dim_output_faces, png_quality)
-    workspace.clean_workspace(subjects)
+    workspace.clean_subjects_workspace(subjects)
 
 
 def extract(subjects_dir: Path, dim_output_faces: int, png_quality: int) -> None:
-    workspace.create_workspace(subjects_dir, dim_output_faces, png_quality)
+    workspace.create_subject_workspace(subjects_dir, dim_output_faces, png_quality)
     subjects = workspace.load_subjects(subjects_dir, dim_output_faces, png_quality)
     proxy_extract.launch(subjects, 'whole_face', dim_output_faces, png_quality)
 
@@ -60,6 +62,7 @@ if __name__ == '__main__':
     print("args : ", args)
 
     actions = {
+        "to_subject": (videos_to_subjects, ('videos_dir', 'subjects_dir')),
         "clean": (clean_workspace, ('subjects_dir', 'dim_output_faces', 'png_quality')),
         "extract": (extract, ('subjects_dir', 'dim_output_faces', 'png_quality')),
         "pack": (pack, ('subjects_dir', 'dim_output_faces', 'png_quality')),

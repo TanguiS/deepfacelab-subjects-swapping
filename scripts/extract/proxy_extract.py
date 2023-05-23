@@ -2,8 +2,8 @@ from pathlib import Path
 from typing import List
 
 from core import osex
-from scripts.SubjectLoader import Subject
-from scripts.env.workspace import WorkspaceStr
+from scripts.Subject import Subject
+from scripts.workspace.workspace import WorkspaceStr
 
 
 def cut_video(input_video: Path):
@@ -66,7 +66,7 @@ def sort_dir_by_hist(input_dir: Path):
 def recover_aligned_name(subject: Subject):
     osex.set_process_lowest_prio()
     from mainscripts import Util
-    Util.recover_original_aligned_filename(subject.aligned())
+    Util.recover_original_aligned_filename(subject.aligned_frames())
 
 
 def launch(subjects: List[Subject], face_type: str, image_size: int, jpeg_quality: int) -> None:
@@ -77,9 +77,9 @@ def launch(subjects: List[Subject], face_type: str, image_size: int, jpeg_qualit
         else:
             subject.clean_alignment()
         # cut_video(subject.video())
-        video_to_frames(subject.video(), subject.frames())
-        extract_face(subject.frames(), subject.aligned(), face_type, image_size, jpeg_quality)
-        sort_dir_by_hist(subject.frames())
+        video_to_frames(subject.original_video(), subject.original_frames())
+        extract_face(subject.original_frames(), subject.aligned_frames(), face_type, image_size, jpeg_quality)
+        sort_dir_by_hist(subject.original_frames())
         subject.extract_done()
         to_recover.append(subject)
     if len(to_recover) == 0:

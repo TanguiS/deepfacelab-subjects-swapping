@@ -1,24 +1,30 @@
-import subprocess
-from typing import List, Union
+import json
+from pathlib import Path
 
+# List of elements with four values each
+elements = [
+    ['aagfhgtpmv.mp4', 'FAKE', 'train', 'vudstovrck.mp4'],
+    ['aapnvogymq.mp4', 'FAKE', 'train', None]
+]
 
-def encode_gpu_indexes(gpu_indexes: Union[List, List[int]]) -> str:
-    str_list = [str(idx) for idx in gpu_indexes]
-    result = ",".join(str_list)
-    return result
+# Create an empty dictionary
+data = {}
 
+# Iterate over the list of elements and add the values to the dictionary
+for element in elements:
+    key = element[0]
+    value = {
+        'label': element[1],
+        'split': element[2],
+        'original': element[3]
+    }
+    data[key] = value
 
-def decode_gpu_indexes(str_gpu_indexes: str) -> List[int]:
-    split = str_gpu_indexes.split(",")
-    return [int(idx) for idx in split]
+# Write the dictionary as JSON to a file
+filename = Path('C:\\WORK\\deepfacelab-subjects-swapping\\metadata.json')
+filename.touch(exist_ok=True)
+with open(filename, 'w') as file:
+    json.dump(data, file)
 
+print(f"JSON data has been written to '{filename}'")
 
-int_list = [0]
-
-to_str = encode_gpu_indexes(int_list)
-
-print(to_str)
-
-to_list = decode_gpu_indexes(to_str)
-
-print(to_list)

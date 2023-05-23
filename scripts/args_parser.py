@@ -11,7 +11,7 @@ def args_parser() -> Dict[str, any]:
 
     parser.add_argument(
         "-a", "--action",
-        choices=["extract", "pack", "unpack", "pretrain", "swap", "clean"],
+        choices=["to_subject", "extract", "pack", "unpack", "pretrain", "swap", "clean"],
         default="extract",
         help="Action made by the script :\n   -> extract : extract the whole face of each subject\n   -> pack : pack "
              "the extracted faces in order to pretrain\n<default::extract>"
@@ -46,6 +46,11 @@ def args_parser() -> Dict[str, any]:
         type=str,
         default="",
         help="Name of the SAEHD model used, will be asked with a list of model or create one if not given"
+    )
+
+    parser.add_argument(
+        "--videos_dir",
+        type=Path
     )
 
     parser.add_argument(

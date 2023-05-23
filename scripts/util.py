@@ -1,16 +1,16 @@
 from pathlib import Path
 from typing import List
 
-from scripts.SubjectLoader import Subject
+from scripts.Subject import Subject
 
 
 def cp_aligned_frames(subjects: List[Subject], dst_dir: Path) -> None:
-    from scripts.env.workspace import WorkspaceStr
+    from scripts.workspace.workspace import WorkspaceStr
     import shutil
 
     hard_clean_dir(dst_dir)
     for subject in subjects:
-        for src_file in subject.aligned().glob('*'):
+        for src_file in subject.aligned_frames().glob('*'):
             tmp = dst_dir / (WorkspaceStr.subject.value + str(subject.id()) + "_" + src_file.stem + src_file.suffix)
             shutil.copy(src_file, tmp)
 

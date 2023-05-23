@@ -3,8 +3,8 @@ import subprocess
 from pathlib import Path
 from typing import List, Union
 
-from scripts.SubjectLoader import Subject
-from scripts.env.workspace import WorkspaceStr
+from scripts.Subject import Subject
+from scripts.workspace.workspace import WorkspaceStr
 from scripts.train import proxy_train
 
 
@@ -14,9 +14,9 @@ def merge_to_mp4(subject_src: Subject, subject_dst: Subject) -> None:
     osex.set_process_lowest_prio()
     from mainscripts import VideoEd
     VideoEd.video_from_sequence(
-        input_dir=subject_src.merged_from(subject_dst.id()),
-        output_file=subject_src.swap_videos().joinpath(f"result_from_{subject_dst.id()}.mp4"),
-        reference_file=subject_dst.video(),
+        input_dir=subject_src.merged_frames_from(subject_dst.id()),
+        output_file=subject_src.merged_videos_dir().joinpath(f"result_from_{subject_dst.id()}.mp4"),
+        reference_file=subject_dst.original_video(),
         ext="png",
         fps=0,
         bitrate=16,
@@ -36,10 +36,10 @@ def merge(
         model_class_name='SAEHD',
         saved_models_path=model_dir,
         force_model_name=model_name if not "" else None,
-        input_path=subject_dst.frames(),
-        output_path=subject_src.merged_from(subject_dst.id()),
-        output_mask_path=subject_src.mask_from(subject_dst.id()),
-        aligned_path=subject_dst.aligned(),
+        input_path=subject_dst.original_frames(),
+        output_path=subject_src.merged_frames_from(subject_dst.id()),
+        output_mask_path=subject_src.mask_frames_from(subject_dst.id()),
+        aligned_path=subject_dst.aligned_frames(),
         force_gpu_idxs=gpu_indexes,
         cpu_only=None
     )
@@ -170,5 +170,5 @@ def launch(subjects: List[Subject], model_dir: Path, model_name: str) -> None:
                 else:
                     break
             """
-            subject_src.merged_from_done(subject_dst.id())
+            subject_src.merged_done_from(subject_dst.id())
             merge_to_mp4(subject_src, subject_dst)

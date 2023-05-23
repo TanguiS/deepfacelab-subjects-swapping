@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import List
 
-from scripts.SubjectLoader import Subject
+from scripts.Subject import Subject
 
 
 def pack(src_dir: Path) -> None:
