@@ -50,6 +50,8 @@ def save_model_copy(model_name: str, model_dir_src: Path, model_dir_dst: Path) -
         shutil.rmtree(backup_dir)
     backup_dir.mkdir()
     for file in files:
+        if file.is_dir():
+            continue
         shutil.copy(file, backup_dir)
 
 
@@ -68,7 +70,7 @@ def launch(
         'saved_models_path': model_dir,
         'training_data_src_path': subject_src.aligned(),
         'training_data_dst_path': subject_dst.aligned(),
-        'pretraining_data_path': Path(WorkspaceStr.pretrain.value),
+        'pretraining_data_path': subject_src.root().parent.joinpath(WorkspaceStr.pretrain.value),
         'pretrained_model_path': None,
         'no_preview': False,
         'force_model_name': model_name if not "" else None,

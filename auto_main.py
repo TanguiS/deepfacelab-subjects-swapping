@@ -49,7 +49,7 @@ def face_swap_action(
 def merge(
         subjects_dir: Path, dim_output_faces: int, png_quality: int,
         subject_id_src: int, subject_id_dst: int, model_dir: Path,
-        model_name: str, gpu_indexes: Union[list, List[int]]) -> None:
+        model_name: str, gpu_indexes: str) -> None:
     subjects = workspace.load_subjects(subjects_dir, dim_output_faces, png_quality)
     subject_src = None
     subject_dst = None
@@ -63,8 +63,13 @@ def merge(
         subject_dst=subject_dst,
         model_dir=model_dir,
         model_name=model_name,
-        gpu_indexes=None
+        gpu_indexes=decode_gpu_indexes(gpu_indexes)
     )
+
+
+def decode_gpu_indexes(str_gpu_indexes: str) -> List[int]:
+    split = str_gpu_indexes.split(",")
+    return [int(idx) for idx in split]
 
 
 if __name__ == '__main__':
@@ -101,5 +106,4 @@ if __name__ == '__main__':
         raise NotImplementedError(f"Action : '{action}' is not handled.")
 
     kwargs = {arg: args[arg] for arg in action_args}
-    print("kwargs : ", kwargs)
     action_fn(**kwargs)

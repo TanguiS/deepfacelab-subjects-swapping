@@ -1,4 +1,3 @@
-import shutil
 from pathlib import Path
 from typing import List
 
@@ -71,6 +70,7 @@ def recover_aligned_name(subject: Subject):
 
 
 def launch(subjects: List[Subject], face_type: str, image_size: int, jpeg_quality: int) -> None:
+    to_recover = []
     for subject in subjects:
         if subject.is_extract_done():
             continue
@@ -81,8 +81,11 @@ def launch(subjects: List[Subject], face_type: str, image_size: int, jpeg_qualit
         extract_face(subject.frames(), subject.aligned(), face_type, image_size, jpeg_quality)
         sort_dir_by_hist(subject.frames())
         subject.extract_done()
+        to_recover.append(subject)
+    if len(to_recover) == 0:
+        return
     print("Manually Clean the Aligned face-set, then press [Enter] to continue...")
     input()
     print("Continuing...")
-    for subject in subjects:
+    for subject in to_recover:
         recover_aligned_name(subject)

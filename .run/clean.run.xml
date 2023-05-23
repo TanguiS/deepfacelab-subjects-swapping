@@ -14,7 +14,7 @@
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/auto_main.py" />
-    <option name="PARAMETERS" value="-a &quot;clean&quot; --subjects_dir &quot;$PROJECT_DIR$/../my_data/subjects&quot;" />
+    <option name="PARAMETERS" value="-a &quot;clean&quot; --subjects_dir &quot;/media/tangui/CA1EF5E61EF5CC07/ubuntu_drive/DeepFaceLab_data/my_data/subjects&quot;" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />

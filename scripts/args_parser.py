@@ -26,13 +26,13 @@ def args_parser() -> Dict[str, any]:
     parser.add_argument(
         "--png_quality",
         type=int,
-        default=90
+        default=None
     )
 
     parser.add_argument(
         "--dim_output_faces",
         type=int,
-        default=512
+        default=None
     )
 
     parser.add_argument(
@@ -71,7 +71,7 @@ def args_parser() -> Dict[str, any]:
 
     parser.add_argument(
         '--gpu_indexes',
-        type=Union[list, List[int]]
+        type=str
     )
 
     return vars(parser.parse_args())

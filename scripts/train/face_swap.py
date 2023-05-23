@@ -6,7 +6,6 @@ from scripts.SubjectLoader import Subject
 from scripts.train import proxy_train
 
 
-"""
 def merge_to_mp4(subject_src: Subject, subject_dst: Subject) -> None:
     from core import osex
 
@@ -22,7 +21,6 @@ def merge_to_mp4(subject_src: Subject, subject_dst: Subject) -> None:
         include_audio=False,
         lossless=True
     )
-"""
 
 
 def merge(
@@ -56,6 +54,12 @@ def face_swap_train(
     proxy_train.launch(subject_src, subject_dst, model_dir, model_name, gpu_indexes, silent_start)
 
 
+def encode_gpu_indexes(gpu_indexes: Union[List, List[int]]) -> str:
+    str_list = [str(idx) for idx in gpu_indexes]
+    result = ",".join(str_list)
+    return result
+
+
 def launch(subjects: List[Subject], model_dir: Path, model_name: str) -> None:
     model_name = proxy_train.choose_model(model_dir, model_name)
     gpu_indexes = proxy_train.choose_gpu_index()
@@ -63,6 +67,8 @@ def launch(subjects: List[Subject], model_dir: Path, model_name: str) -> None:
     for i, subject_src in enumerate(subjects):
         for j, subject_dst in enumerate(subjects):
             if i == j:
+                continue
+            if subject_src.is_merged_from_is_done(subject_dst.id()):
                 continue
             if i == 0:
                 face_swap_train(subject_src, subject_dst, model_dir, model_name, gpu_indexes)
@@ -72,9 +78,20 @@ def launch(subjects: List[Subject], model_dir: Path, model_name: str) -> None:
                 "python", "auto_main.py", "--action", "merge",
                 "--subjects_dir", str(subjects[0].root().parent), "--dim_output_faces", str(dim), "--png_quality",
                 str(quality), "--subject_id_src", str(subject_src.id()), "--subject_id_dst", str(subject_dst.id()),
-                "--model_dir", str(model_dir), "--model_name", model_name, "--gpu_indexes", str(gpu_indexes)
+                "--model_dir", str(model_dir), "--model_name", model_name,
+                "--gpu_indexes", encode_gpu_indexes(gpu_indexes)
             ]
-            subprocess.Popen(["start", "cmd", "/k"] + command, shell=True)
-            print("Press [Enter] when merge is done...")
-            input()
-            # merge_to_mp4(subject_src, subject_dst)
+            command_str = " ".join(command)
+            print(command_str)
+
+            while True:
+                subprocess.Popen(f"gnome-terminal -- bash -ic 'conda activate deepfacelab; {command_str}; exec $SHELL'",
+                                 shell=True)
+                print("Press [Enter] when merge is done or [r] to retry and run merger again...")
+                user_input = input().lower()
+                if user_input == 'r':
+                    continue
+                else:
+                    break
+            subject_src.merged_from_done(subject_dst.id())
+            merge_to_mp4(subject_src, subject_dst)

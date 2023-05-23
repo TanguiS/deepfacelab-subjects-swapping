@@ -1,13 +1,15 @@
 import shutil
 from pathlib import Path
-from typing import Tuple
+from typing import Tuple, Union
 
 from scripts.env.workspace import WorkspaceStr
 
 
 class Subject:
-    def __init__(self, subject_path: Path, dim: int, quality: int) -> None:
+    def __init__(self, subject_path: Path, dim: Union[int, any] = None, quality: Union[int, any] = None) -> None:
         self.__root = subject_path
+        if dim is None or quality is None:
+            raise NotImplementedError("feature not implemented yet, please provide dim and quality.")
         self.__dim = dim
         self.__quality = quality
         self.__tag = subject_path.joinpath(f".tag_{dim}_{quality}")
