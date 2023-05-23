@@ -69,13 +69,19 @@ def main (model_class_name=None,
                                                     place_model_on_cpu=True,
                                                     run_on_cpu=run_on_cpu)
 
-        is_interactive = io.input_bool ("Use interactive merger?", True) if not io.is_colab() else False
+        # is_interactive = io.input_bool ("Use interactive merger?", True) if not io.is_colab() else False
+
+        is_interactive = False
 
         if not is_interactive:
             cfg.ask_settings()
-            
+
+        """ 
         subprocess_count = io.input_int("Number of workers?", max(8, multiprocessing.cpu_count()), 
                                         valid_range=[1, multiprocessing.cpu_count()], help_message="Specify the number of threads to process. A low value may affect performance. A high value may result in memory error. The value may not be greater than CPU cores." )
+        """
+
+        subprocess_count = multiprocessing.cpu_count()
 
         input_path_image_paths = pathex.get_image_paths(input_path)
 

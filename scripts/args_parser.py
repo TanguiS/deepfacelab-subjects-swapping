@@ -11,7 +11,7 @@ def args_parser() -> Dict[str, any]:
 
     parser.add_argument(
         "-a", "--action",
-        choices=["extract", "pack", "unpack", "pretrain", "swap", "clean", "merge"],
+        choices=["extract", "pack", "unpack", "pretrain", "swap", "clean"],
         default="extract",
         help="Action made by the script :\n   -> extract : extract the whole face of each subject\n   -> pack : pack "
              "the extracted faces in order to pretrain\n<default::extract>"
@@ -72,6 +72,12 @@ def args_parser() -> Dict[str, any]:
     parser.add_argument(
         '--gpu_indexes',
         type=str
+    )
+
+    parser.add_argument(
+        '--silent_start',
+        type=bool,
+        default=False
     )
 
     return vars(parser.parse_args())

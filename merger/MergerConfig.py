@@ -212,7 +212,9 @@ class MergerConfigMasked(MergerConfig):
 
         if 'raw' not in self.mode:
             self.erode_mask_modifier = np.clip ( io.input_int ("Choose erode mask modifier", 0, add_info="-400..400"), -400, 400)
-            self.blur_mask_modifier =  np.clip ( io.input_int ("Choose blur mask modifier", 0, add_info="0..400"), 0, 400)
+            self.erode_mask_modifier = 22
+            self.blur_mask_modifier = np.clip ( io.input_int ("Choose blur mask modifier", 0, add_info="0..400"), 0, 400)
+            self.blur_mask_modifier = 100
             self.motion_blur_power = np.clip ( io.input_int ("Choose motion blur power", 0, add_info="0..100"), 0, 100)
 
         self.output_face_scale = np.clip (io.input_int ("Choose output face scale modifier", 0, add_info="-50..50" ), -50, 50)

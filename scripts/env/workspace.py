@@ -14,6 +14,7 @@ class WorkspaceStr(enum.Enum):
     tag = ".tag"
     pretrain = "pretrain_faces"
     mask = "mask"
+    tmp_save = "tmp_save"
 
 
 from scripts.SubjectLoader import Subject
@@ -49,6 +50,8 @@ def load_subjects(subjects_path: Path, dim: int, quality: int) -> List[Subject]:
 
     subjects = []
     total = len([item for item in subjects_path.glob(WorkspaceStr.subject.value + "*")])
-    for curr in tqdm(subjects_path.glob(WorkspaceStr.subject.value + "*"), total=total, desc="loading subjects", miniters=1.0, unit="subjects/s"):
+    for curr in tqdm(
+            subjects_path.glob(WorkspaceStr.subject.value + "*"),
+            total=total, desc="loading subjects", miniters=1.0, unit="subjects/s"):
         subjects.append(Subject(curr, dim, quality))
     return subjects

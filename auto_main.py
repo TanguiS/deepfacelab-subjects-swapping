@@ -36,7 +36,8 @@ def pretrain(
     model_name = proxy_train.choose_model(model_dir, model_name)
     subjects = workspace.load_subjects(subjects_dir, dim_output_faces, png_quality)
     proxy_train.launch(subjects[0], subjects[1], model_dir, model_name, None)
-    proxy_train.save_model_copy(model_name, model_dir, model_dir_backup)
+    if model_dir_backup.exists() and model_dir_backup.is_dir():
+        proxy_train.save_model_copy(model_name, model_dir, model_dir_backup)
 
 
 def face_swap_action(
@@ -44,32 +45,6 @@ def face_swap_action(
         model_dir: Path, model_name: str) -> None:
     subjects = workspace.load_subjects(subjects_dir, dim_output_faces, png_quality)
     face_swap.launch(subjects, model_dir, model_name)
-
-
-def merge(
-        subjects_dir: Path, dim_output_faces: int, png_quality: int,
-        subject_id_src: int, subject_id_dst: int, model_dir: Path,
-        model_name: str, gpu_indexes: str) -> None:
-    subjects = workspace.load_subjects(subjects_dir, dim_output_faces, png_quality)
-    subject_src = None
-    subject_dst = None
-    for subject in subjects:
-        if subject.id() == subject_id_src:
-            subject_src = subject
-        if subject.id() == subject_id_dst:
-            subject_dst = subject
-    face_swap.merge(
-        subject_src=subject_src,
-        subject_dst=subject_dst,
-        model_dir=model_dir,
-        model_name=model_name,
-        gpu_indexes=decode_gpu_indexes(gpu_indexes)
-    )
-
-
-def decode_gpu_indexes(str_gpu_indexes: str) -> List[int]:
-    split = str_gpu_indexes.split(",")
-    return [int(idx) for idx in split]
 
 
 if __name__ == '__main__':
@@ -92,11 +67,7 @@ if __name__ == '__main__':
         "pretrain": (pretrain, (
             'subjects_dir', 'dim_output_faces', 'png_quality', 'model_dir', 'model_name', 'model_dir_backup'
         )),
-        "swap": (face_swap_action, ('subjects_dir', 'dim_output_faces', 'png_quality', 'model_dir', 'model_name')),
-        "merge": (merge, (
-            'subjects_dir', 'dim_output_faces', 'png_quality', 'subject_id_src',
-            'subject_id_dst', 'model_dir', 'model_name', 'gpu_indexes'
-        ))
+        "swap": (face_swap_action, ('subjects_dir', 'dim_output_faces', 'png_quality', 'model_dir', 'model_name'))
     }
 
     action = args["action"]
