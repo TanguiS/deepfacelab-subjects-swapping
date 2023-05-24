@@ -7,8 +7,9 @@ from scripts.extract import proxy_extract, facet_pack, facet_unpack
 from scripts.workspace.workspace import WorkspaceStr
 
 
-def videos_to_subjects(input_videos_dir: Path, output_subjects_dir: Path) -> None:
-    workspace.videos_to_subject(input_videos_dir, output_subjects_dir)
+def videos_to_subjects(videos_dir: Path, subjects_dir: Path) -> None:
+    workspace.videos_to_subject(videos_dir, subjects_dir)
+
 
 def clean_workspace(subjects_dir: Path, dim_output_faces: int, png_quality: int) -> None:
     subjects = workspace.load_subjects(subjects_dir, dim_output_faces, png_quality)
@@ -38,7 +39,7 @@ def pretrain(
     model_name = proxy_train.choose_model(model_dir, model_name)
     subjects = workspace.load_subjects(subjects_dir, dim_output_faces, png_quality)
     proxy_train.launch(subjects[0], subjects[1], model_dir, model_name, None)
-    if model_dir_backup.exists() and model_dir_backup.is_dir():
+    if model_dir_backup is not None and model_dir_backup.exists() and model_dir_backup.is_dir():
         proxy_train.save_model_copy(model_name, model_dir, model_dir_backup)
 
 

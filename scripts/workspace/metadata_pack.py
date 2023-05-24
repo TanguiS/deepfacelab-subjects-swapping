@@ -1,42 +1,35 @@
 import json
-from pathlib import Path
-from typing import List
+from typing import List, Union, Dict, Optional
+
+from tqdm import tqdm
 
 from scripts.Subject import Subject
 
 
-def metadata_pack(subjects: List[Subject], output_dir_metapack: Path) -> None:
-    if output_dir_metapack.is_file():
-        raise IOError("Error: output dir for metapack is a file.")
-    output_dir_metapack.mkdir(exist_ok=True)
+def value(label: str, split: str, original: Union[str, any] = None) -> Dict[str, Optional[str]]:
+    return {
+        'label': label,
+        'split': split,
+        'original': original
+    }
 
-    metapack = output_dir_metapack.joinpath("metadata.json")
-    if metapack.exists():
-        metapack.unlink()
-    metapack.touch()
 
-    data = {}
-    for i, subject_src in enumerate(subjects):
-        original = subject_src.original_video()
-        value = {
-            'label': "REAL",
-            'split': "train",
-            'original': None
-        }
-        data[original] = value
-        for j, subject_dst in enumerate(subjects):
-            if i == j:
+def launch(subjects: List[Subject]) -> None:
+    for subject_src in tqdm(subjects, total=len(subjects), desc="creating metadata", miniters=1.0, unit="subject"):
+        subject_src.reset_metadata()
+        data = {}
+
+        original = subject_src.original_video().name
+        data[original] = value("REAL", "train")
+
+        for subject_dst in subjects:
+            if subject_dst == subject_src:
                 continue
-            original = subject_dst.original_video()
             fake = subject_src.merged_videos_from(subject_dst.id())
-            value = {
-                'label': "FAKE",
-                'split': "train",
-                'original': original
-            }
-            data[fake] = value
+            tmp = fake.parent
+            fake = str(tmp.name) + "/" + str(fake.name)
+            original = subject_dst.original_video().name
+            data[fake] = value("FAKE", "train", original)
 
-        with open(metapack, 'w') as file:
+        with open(subject_src.metadata(), 'w') as file:
             json.dump(data, file)
-
-

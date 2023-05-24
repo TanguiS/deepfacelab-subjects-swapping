@@ -18,71 +18,56 @@ def args_parser() -> Dict[str, any]:
     )
 
     parser.add_argument(
-        "-c", "--clean",
-        action="store_true",
-        help="clean subjects results"
-    )
-
-    parser.add_argument(
         "--png_quality",
         type=int,
-        default=None
+        default=None,
+        help="Quality of the extracted images from the raw videos."
     )
 
     parser.add_argument(
         "--dim_output_faces",
         type=int,
-        default=None
+        default=None,
+        help="Dim of the extracted output faces."
     )
 
     parser.add_argument(
         "--model_dir",
         type=Path,
-        help="Dir to the model to use"
+        help="Dir to the models. Can have more than one model."
     )
 
     parser.add_argument(
         "--model_name",
         type=str,
         default="",
-        help="Name of the SAEHD model used, will be asked with a list of model or create one if not given"
+        help="Name of the SAEHD model used, will be asked with a list of model from the --model_dir arg or create " +
+             "one if empty"
     )
 
     parser.add_argument(
         "--videos_dir",
-        type=Path
+        type=Path,
+        help="Path to the videos directory to create subjects from them."
     )
 
     parser.add_argument(
         "--model_dir_backup",
-        type=Path
+        type=Path,
+        help="Path to the backup for the pretrained model, used for face swapping. If None -> no backup at the end."
     )
 
     parser.add_argument(
         "--subjects_dir",
         type=Path,
-        required=True
-    )
-
-    parser.add_argument(
-        "--subject_id_src",
-        type=int
-    )
-
-    parser.add_argument(
-        "--subject_id_dst",
-        type=int
+        required=True,
+        help="Path to the subjects directory."
     )
 
     parser.add_argument(
         '--gpu_indexes',
-        type=str
-    )
-
-    parser.add_argument(
-        '--silent_start',
-        type=bool,
-        default=False
+        type=str,
+        help="Not your concern for now."
     )
 
     return vars(parser.parse_args())

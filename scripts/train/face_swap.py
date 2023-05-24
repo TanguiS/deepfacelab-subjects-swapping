@@ -3,6 +3,8 @@ import subprocess
 from pathlib import Path
 from typing import List, Union
 
+from tqdm import tqdm
+
 from scripts.Subject import Subject
 from scripts.workspace.workspace import WorkspaceStr
 from scripts.train import proxy_train
@@ -63,27 +65,27 @@ def setup(model_dir: Path, model_name: str, gpu_indexes: Union[list, List[int]],
     command = [
         "python", "auto_main.py", "--action", "pretrain",
         "--dim_output_faces", str(dim), "--png_quality", str(quality),
-        "--model_dir", str(model_dir), "--model_name", model_name,
-        "--model_dir_backup", str(Path("none"))
+        "--model_dir", str(model_dir), "--model_name", model_name, "--subjects_dir", str(subject.root_dir().parent)
     ]
     command_str = " ".join(command)
     print(command_str)
     while True:
         subprocess.Popen(f"gnome-terminal -- bash -ic 'conda activate deepfacelab; {command_str}; exec $SHELL'",
                          shell=True)
-        print("Press [Enter] when merge is done or [r] to retry and run merger again...")
+        print("Press [Enter] when setup is done or [r] to retry and run setup again...")
         user_input = input().lower()
         if user_input == 'r':
             continue
         else:
             break
+    print("Continuing...")
 
     files = [file for file in model_dir.glob(f"{model_name}*")]
     save_dir = model_dir.joinpath(WorkspaceStr.tmp_save.value)
     if save_dir.exists():
         shutil.rmtree(save_dir)
     save_dir.mkdir()
-    for file in files:
+    for file in tqdm(files, total=len(files), miniters=1, desc="copying model for face swapping switch"):
         if file.is_dir():
             continue
         shutil.copy(file, save_dir)
@@ -99,7 +101,7 @@ def swap_model(model_dir: Path, model_name: str) -> None:
         file.unlink()
 
     files = [file for file in model_dir.joinpath(WorkspaceStr.tmp_save.value).glob(f"{model_name}*")]
-    for file in files:
+    for file in tqdm(files, total=len(files), miniters=1, desc="swapping model"):
         if file.is_dir():
             continue
         shutil.copy(file, model_dir)
@@ -108,7 +110,6 @@ def swap_model(model_dir: Path, model_name: str) -> None:
 def launch(subjects: List[Subject], model_dir: Path, model_name: str) -> None:
     model_name = proxy_train.choose_model(model_dir, model_name)
     gpu_indexes = proxy_train.choose_gpu_index()
-    dim, quality = subjects[0].specs()
     setup(model_dir, model_name, gpu_indexes, subjects[0])
     for i, subject_src in enumerate(subjects):
         for j, subject_dst in enumerate(subjects):
