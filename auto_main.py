@@ -11,6 +11,11 @@ def videos_to_subjects(videos_dir: Path, subjects_dir: Path) -> None:
     workspace.videos_to_subject(videos_dir, subjects_dir)
 
 
+def update_workspace(subjects_dir: Path, dim_output_faces: int, png_quality: int):
+    subjects = workspace.load_subjects(subjects_dir, dim_output_faces, png_quality)
+    workspace.update_subjects(subjects)
+
+
 def clean_workspace(subjects_dir: Path, dim_output_faces: int, png_quality: int) -> None:
     subjects = workspace.load_subjects(subjects_dir, dim_output_faces, png_quality)
     workspace.clean_subjects_workspace(subjects)
@@ -64,6 +69,7 @@ if __name__ == '__main__':
 
     actions = {
         "to_subject": (videos_to_subjects, ('videos_dir', 'subjects_dir')),
+        "update_wrk": (update_workspace, ('subjects_dir', 'dim_output_faces', 'png_quality')),
         "clean": (clean_workspace, ('subjects_dir', 'dim_output_faces', 'png_quality')),
         "extract": (extract, ('subjects_dir', 'dim_output_faces', 'png_quality')),
         "pack": (pack, ('subjects_dir', 'dim_output_faces', 'png_quality')),

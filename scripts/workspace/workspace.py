@@ -82,6 +82,27 @@ def load_subjects(subjects_path: Path, dim: int, quality: int) -> List[Subject]:
 
     subjects = []
     tmp = [item for item in subjects_path.glob(WorkspaceStr.subject.value + "*")]
-    for curr in tqdm(tmp,total=len(tmp), desc="loading subjects", miniters=1.0, unit="subject"):
+    for curr in tqdm(tmp, total=len(tmp), desc="loading subjects", miniters=1.0, unit="subject"):
         subjects.append(Subject(curr, dim, quality))
     return subjects
+
+
+def update_subjects(subjects: List[Subject]) -> None:
+    import shutil
+
+    remaining_ids = {subject.id() for subject in subjects}
+    max_id = len(subjects)
+
+    for subject in subjects:
+        if subject.id() <= max_id:
+            continue
+        index = 1
+        for i in range(1, max_id + 1):
+            if i in remaining_ids:
+                continue
+            index = i
+            remaining_ids.add(index)
+            remaining_ids.remove(subject.id())
+            break
+        shutil.move(str(subject.root_dir()), str(subject.root_dir().parent.joinpath(
+            WorkspaceStr.subject.value + str(index))))

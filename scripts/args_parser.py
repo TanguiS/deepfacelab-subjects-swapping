@@ -11,7 +11,7 @@ def args_parser() -> Dict[str, any]:
 
     parser.add_argument(
         "-a", "--action",
-        choices=["to_subject", "extract", "pack", "unpack", "pretrain", "swap", "clean"],
+        choices=["to_subject", "update_wrk", "extract", "pack", "unpack", "pretrain", "swap", "clean"],
         default="extract",
         help="Action made by the script :\n   -> extract : extract the whole face of each subject\n   -> pack : pack "
              "the extracted faces in order to pretrain\n<default::extract>"

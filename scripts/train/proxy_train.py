@@ -1,6 +1,8 @@
 from pathlib import Path
 from typing import List, Union
 
+from tqdm import tqdm
+
 from scripts.Subject import Subject
 from scripts.workspace.workspace import WorkspaceStr
 
@@ -49,7 +51,7 @@ def save_model_copy(model_name: str, model_dir_src: Path, model_dir_dst: Path) -
     if backup_dir.exists():
         shutil.rmtree(backup_dir)
     backup_dir.mkdir()
-    for file in files:
+    for file in tqdm(files, total=len(files), desc="Copying pretrained model"):
         if file.is_dir():
             continue
         shutil.copy(file, backup_dir)
