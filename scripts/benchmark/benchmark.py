@@ -8,7 +8,7 @@ import scripts.train.face_swap
 from scripts.Subject import Subject
 from scripts.train import util, proxy_train
 from scripts.workspace import workspace
-from scripts.workspace.workspace import WorkspaceStr
+from scripts.workspace.WorkspaceEnum import WorkspaceStr
 
 
 def write_bench(output_dir: Path, model_name: str, target_iteration: int, start_time: str, end_time: str):

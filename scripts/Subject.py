@@ -2,7 +2,7 @@ import shutil
 from pathlib import Path
 from typing import Tuple, Union
 
-from scripts.workspace.workspace import WorkspaceStr
+from scripts.workspace.WorkspaceEnum import WorkspaceStr
 
 
 class Subject:

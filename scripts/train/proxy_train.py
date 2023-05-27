@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 from scripts.Subject import Subject
 from scripts.train.util import choose_model
-from scripts.workspace.workspace import WorkspaceStr
+from scripts.workspace.WorkspaceEnum import WorkspaceStr
 
 
 def save_model_copy(model_name: str, model_dir_src: Path, model_dir_dst: Path) -> None:

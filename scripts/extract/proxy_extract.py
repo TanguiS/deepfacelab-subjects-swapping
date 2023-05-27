@@ -3,7 +3,7 @@ from typing import List
 
 from core import osex
 from scripts.Subject import Subject
-from scripts.workspace.workspace import WorkspaceStr
+from scripts.workspace.WorkspaceEnum import WorkspaceStr
 
 
 def cut_video(input_video: Path):

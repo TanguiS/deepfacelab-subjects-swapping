@@ -6,7 +6,7 @@ from scripts import args_parser
 from scripts.workspace import workspace
 from scripts.train import proxy_train, face_swap
 from scripts.extract import proxy_extract, facet_pack, facet_unpack
-from scripts.workspace.workspace import WorkspaceStr
+from scripts.workspace.WorkspaceEnum import WorkspaceStr
 
 
 def videos_to_subjects(videos_dir: Path, subjects_dir: Path) -> None:
@@ -66,7 +66,6 @@ if __name__ == '__main__':
     nn.initialize_main_env()
 
     args = args_parser.args_parser()
-    root = args["subjects_dir"]
     print("args : ", args)
 
     actions = {

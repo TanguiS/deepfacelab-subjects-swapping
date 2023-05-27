@@ -10,7 +10,7 @@ import scripts.train.util
 import scripts.util
 from scripts.Subject import Subject
 from scripts.train.util import proxy_merge_mp4
-from scripts.workspace.workspace import WorkspaceStr
+from scripts.workspace.WorkspaceEnum import WorkspaceStr
 from scripts.train import proxy_train, util
 
 

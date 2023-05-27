@@ -1,26 +1,9 @@
 from pathlib import Path
-import enum
 from typing import List
 
 from tqdm import tqdm
 
-
-class WorkspaceStr(enum.Enum):
-    frames = "frames"
-    aligned = frames + "/aligned"
-    s_videos = "merged_videos"
-    s_frames = "merged_frames"
-    subject = "subject_"
-    dst_video = "from_"
-    videos = "output.*"
-    tag = ".tag"
-    pretrain = "pretrain_faces"
-    mask = "mask"
-    tmp_save = "tmp_save"
-    metadata = "metadata.json"
-    benchmark_csv = "benchmark.csv"
-
-
+from scripts.workspace.WorkspaceEnum import WorkspaceStr
 from scripts.Subject import Subject
 
 
@@ -133,5 +116,3 @@ def benchmark_workspace(benchmark_dir: Path, models_name: List[str], max_iterati
         model_dir.joinpath(WorkspaceStr.tmp_save.value).mkdir()
         for iteration_goal in range(delta_iteration, max_iteration + 1, delta_iteration):
             model_dir.joinpath(str(iteration_goal)).mkdir()
-
-

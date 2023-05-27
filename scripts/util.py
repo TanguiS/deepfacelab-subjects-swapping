@@ -7,7 +7,7 @@ from scripts.Subject import Subject
 
 
 def cp_aligned_frames(subjects: List[Subject], dst_dir: Path) -> None:
-    from scripts.workspace.workspace import WorkspaceStr
+    from scripts.workspace.WorkspaceEnum import WorkspaceStr
     import shutil
 
     hard_clean_dir(dst_dir)
