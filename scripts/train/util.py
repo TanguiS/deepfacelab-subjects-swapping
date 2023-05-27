@@ -1,12 +1,16 @@
 from pathlib import Path
 from typing import Union, List
+from core import osex
+from core.leras import nn
+from core.interact import interact as io
+from mainscripts import VideoEd, Merger
+from core import pathex
+import os
+import operator
 
 
 def proxy_merge_mp4(input_dir: Path, output_file: Path, reference_file: Path) -> None:
-    from core import osex
-
     osex.set_process_lowest_prio()
-    from mainscripts import VideoEd
     VideoEd.video_from_sequence(
         input_dir=input_dir,
         output_file=output_file,
@@ -20,21 +24,19 @@ def proxy_merge_mp4(input_dir: Path, output_file: Path, reference_file: Path) ->
 
 
 def proxy_merge(
-        model_dir: Path,
-        model_name: str,
-        input_path: Path,
-        output_path: Path,
-        output_mask_path: Path,
-        aligned_path,
-        gpu_indexes: Union[list, List[int], any]) -> None:
-    from core import osex
-
+    model_dir: Path,
+    model_name: str,
+    input_path: Path,
+    output_path: Path,
+    output_mask_path: Path,
+    aligned_path,
+    gpu_indexes: Union[list, List[int], any]
+) -> None:
     osex.set_process_lowest_prio()
-    from mainscripts import Merger
     Merger.main(
         model_class_name='SAEHD',
         saved_models_path=model_dir,
-        force_model_name=model_name if not "" else None,
+        force_model_name=model_name or None,
         input_path=input_path,
         output_path=output_path,
         output_mask_path=output_mask_path,
@@ -45,7 +47,6 @@ def proxy_merge(
 
 
 def choose_gpu_index() -> Union[list, List[int]]:
-    from core.leras import nn
     return nn.ask_choose_device_idxs(
         choose_only_one=False,
         allow_cpu=True,
@@ -55,10 +56,6 @@ def choose_gpu_index() -> Union[list, List[int]]:
 
 
 def find_models(models_dir: Path) -> List[str]:
-    import os
-    import operator
-    from core import pathex
-
     saved_models_names = []
     for filepath in pathex.get_file_paths(models_dir):
         filepath_name = filepath.name
@@ -70,10 +67,8 @@ def find_models(models_dir: Path) -> List[str]:
 
 
 def choose_model(model_dir_src: Path, model_name: str) -> str:
-    from core.interact import interact as io
-
     if model_name == "":
         files = find_models(model_dir_src)
-        model_name = io.input_str("Choose a model : ", files[0], files,
+        model_name = io.input_str("Choose a model: ", default=files[0], choices=files,
                                   help_message="Model that will be used for training")
     return model_name
