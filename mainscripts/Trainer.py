@@ -163,6 +163,7 @@ def trainerThread (s2c, c2s, e,
                             model_save()
                             is_reached_goal = True
                             io.log_info ('You can use preview now.')
+                            break
                 
                 need_save = False
                 while time.time() - last_save_time >= save_interval_min*60:

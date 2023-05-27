@@ -79,7 +79,7 @@ def launch(subjects: List[Subject], face_type: str, image_size: int, jpeg_qualit
         # cut_video(subject.video())
         video_to_frames(subject.original_video(), subject.original_frames())
         extract_face(subject.original_frames(), subject.aligned_frames(), face_type, image_size, jpeg_quality)
-        sort_dir_by_hist(subject.original_frames())
+        sort_dir_by_hist(subject.aligned_frames())
         subject.extract_done()
         to_recover.append(subject)
     if len(to_recover) == 0:

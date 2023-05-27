@@ -1,7 +1,10 @@
 import multiprocessing
+import shutil
 import subprocess
 from pathlib import Path
 from typing import List, Union
+
+from tqdm import tqdm
 
 from scripts.Subject import Subject
 from scripts.workspace.workspace import WorkspaceStr
@@ -63,27 +66,27 @@ def setup(model_dir: Path, model_name: str, gpu_indexes: Union[list, List[int]],
     command = [
         "python", "auto_main.py", "--action", "pretrain",
         "--dim_output_faces", str(dim), "--png_quality", str(quality),
-        "--model_dir", str(model_dir), "--model_name", model_name,
-        "--model_dir_backup", str(Path("none"))
+        "--model_dir", str(model_dir), "--model_name", model_name, "--subjects_dir", str(subject.root_dir().parent)
     ]
     command_str = " ".join(command)
     print(command_str)
     while True:
         subprocess.Popen(f"gnome-terminal -- bash -ic 'conda activate deepfacelab; {command_str}; exec $SHELL'",
                          shell=True)
-        print("Press [Enter] when merge is done or [r] to retry and run merger again...")
+        print("Press [Enter] when setup is done or [r] to retry and run setup again...")
         user_input = input().lower()
         if user_input == 'r':
             continue
         else:
             break
+    print("Continuing...")
 
     files = [file for file in model_dir.glob(f"{model_name}*")]
     save_dir = model_dir.joinpath(WorkspaceStr.tmp_save.value)
     if save_dir.exists():
         shutil.rmtree(save_dir)
     save_dir.mkdir()
-    for file in files:
+    for file in tqdm(files, total=len(files), miniters=1, desc="copying model for face swapping switch"):
         if file.is_dir():
             continue
         shutil.copy(file, save_dir)
@@ -99,7 +102,7 @@ def swap_model(model_dir: Path, model_name: str) -> None:
         file.unlink()
 
     files = [file for file in model_dir.joinpath(WorkspaceStr.tmp_save.value).glob(f"{model_name}*")]
-    for file in files:
+    for file in tqdm(files, total=len(files), miniters=1, desc="swapping model"):
         if file.is_dir():
             continue
         shutil.copy(file, model_dir)
@@ -108,7 +111,6 @@ def swap_model(model_dir: Path, model_name: str) -> None:
 def launch(subjects: List[Subject], model_dir: Path, model_name: str) -> None:
     model_name = proxy_train.choose_model(model_dir, model_name)
     gpu_indexes = proxy_train.choose_gpu_index()
-    dim, quality = subjects[0].specs()
     setup(model_dir, model_name, gpu_indexes, subjects[0])
     for i, subject_src in enumerate(subjects):
         for j, subject_dst in enumerate(subjects):
@@ -119,56 +121,19 @@ def launch(subjects: List[Subject], model_dir: Path, model_name: str) -> None:
             silent_start = True
             if i == 0:
                 silent_start = False
+
             swap_model(model_dir, model_name)
-            """
-            command = [
-                "python", "auto_main.py", "--action", "faces_train",
-                "--subjects_dir", str(subjects[0].root().parent), "--dim_output_faces", str(dim), "--png_quality",
-                str(quality), "--subject_id_src", str(subject_src.id()), "--subject_id_dst", str(subject_dst.id()),
-                "--model_dir", str(model_dir), "--model_name", model_name,
-                "--gpu_indexes", encode_gpu_indexes(gpu_indexes), "--silent_start", str(silent_start)
-            ]
-            command_str = " ".join(command)
-            print(command_str)
-            # process = subprocess.Popen(f"gnome-terminal -- bash -ic 'conda activate deepfacelab; {command_str}; exec $SHELL'", shell=True)
-
-            # face_swap_train(subject_src, subject_dst, model_dir, model_name, gpu_indexes, silent_start)
-
-            # process.wait()
-            """
 
             process = multiprocessing.Process(target=face_swap_train, args=(
                 subject_src, subject_dst, model_dir, model_name, gpu_indexes, silent_start))
             process.start()
             process.join()
 
-            """
-            command = [
-                "python", "auto_main.py", "--action", "merge",
-                "--subjects_dir", str(subjects[0].root().parent), "--dim_output_faces", str(dim), "--png_quality",
-                str(quality), "--subject_id_src", str(subject_src.id()), "--subject_id_dst", str(subject_dst.id()),
-                "--model_dir", str(model_dir), "--model_name", model_name,
-                "--gpu_indexes", encode_gpu_indexes(gpu_indexes)
-            ]
-            command_str = " ".join(command)
-            print(command_str)
-            """
-
             process = multiprocessing.Process(target=merge, args=(
                 subject_src, subject_dst, model_dir, model_name, gpu_indexes))
             process.start()
             process.join()
 
-            """
-            while True:
-                subprocess.Popen(f"gnome-terminal -- bash -ic 'conda activate deepfacelab; {command_str}; exec $SHELL'",
-                                 shell=True)
-                print("Press [Enter] when merge is done or [r] to retry and run merger again...")
-                user_input = input().lower()
-                if user_input == 'r':
-                    continue
-                else:
-                    break
-            """
             subject_src.merged_done_from(subject_dst.id())
             merge_to_mp4(subject_src, subject_dst)
+    shutil.rmtree(WorkspaceStr.tmp_save.value)

@@ -30,6 +30,14 @@ class Subject:
     def original_frames(self) -> Path:
         return self.__root.joinpath(WorkspaceStr.frames.value)
 
+    def metadata(self) -> Path:
+        return self.__root.joinpath(WorkspaceStr.metadata.value)
+
+    def reset_metadata(self) -> None:
+        if self.metadata().exists():
+            self.metadata().unlink()
+        self.metadata().touch()
+
     def merged_videos_dir(self) -> Path:
         return self.__root.joinpath(WorkspaceStr.s_videos.value)
 
@@ -81,3 +89,5 @@ class Subject:
         tags = self.__root.glob(".tag*")
         for tag in tags:
             tag.unlink()
+        if self.metadata().exists():
+            self.metadata().unlink()

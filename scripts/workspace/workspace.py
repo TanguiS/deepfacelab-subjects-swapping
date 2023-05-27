@@ -2,12 +2,14 @@ from pathlib import Path
 import enum
 from typing import List
 
+from tqdm import tqdm
+
 
 class WorkspaceStr(enum.Enum):
     frames = "frames"
     aligned = frames + "/aligned"
-    s_videos = "swapping_videos"
-    s_frames = "swapping_frames"
+    s_videos = "merged_videos"
+    s_frames = "merged_frames"
     subject = "subject_"
     dst_video = "from_"
     videos = "output.*"
@@ -15,6 +17,7 @@ class WorkspaceStr(enum.Enum):
     pretrain = "pretrain_faces"
     mask = "mask"
     tmp_save = "tmp_save"
+    metadata = "metadata.json"
 
 
 from scripts.Subject import Subject
@@ -40,11 +43,13 @@ def videos_to_subject(input_videos_dir: Path, output_subjects_dir: Path) -> None
     ]
     next_id = len([item for item in output_subjects_dir.glob(WorkspaceStr.subject.value + "*")]) + 1
 
-    for video in videos:
+    total = len(videos)
+    for video in tqdm(videos, total=total):
         subject_dir = output_subjects_dir.joinpath(WorkspaceStr.subject.value + str(next_id))
         subject_dir.mkdir(exist_ok=False)
         output_video_dir = subject_dir.joinpath(WorkspaceStr.videos.value[:-2] + video.suffix)
         shutil.copy(video, output_video_dir)
+        next_id += 1
 
 
 def create_subject_workspace(subjects_path: Path, dim: int, quality: int) -> None:
@@ -76,9 +81,28 @@ def load_subjects(subjects_path: Path, dim: int, quality: int) -> List[Subject]:
     from tqdm import tqdm
 
     subjects = []
-    total = len([item for item in subjects_path.glob(WorkspaceStr.subject.value + "*")])
-    for curr in tqdm(
-            subjects_path.glob(WorkspaceStr.subject.value + "*"),
-            total=total, desc="loading subjects", miniters=1.0, unit="subjects/s"):
+    tmp = [item for item in subjects_path.glob(WorkspaceStr.subject.value + "*")]
+    for curr in tqdm(tmp, total=len(tmp), desc="loading subjects", miniters=1.0, unit="subject"):
         subjects.append(Subject(curr, dim, quality))
     return subjects
+
+
+def update_subjects(subjects: List[Subject]) -> None:
+    import shutil
+
+    remaining_ids = {subject.id() for subject in subjects}
+    max_id = len(subjects)
+
+    for subject in subjects:
+        if subject.id() <= max_id:
+            continue
+        index = 1
+        for i in range(1, max_id + 1):
+            if i in remaining_ids:
+                continue
+            index = i
+            remaining_ids.add(index)
+            remaining_ids.remove(subject.id())
+            break
+        shutil.move(str(subject.root_dir()), str(subject.root_dir().parent.joinpath(
+            WorkspaceStr.subject.value + str(index))))
