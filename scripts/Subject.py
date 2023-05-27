@@ -1,6 +1,5 @@
-import shutil
 from pathlib import Path
-from typing import Tuple, Union
+from typing import Tuple, Union, List
 
 from scripts.workspace.WorkspaceEnum import WorkspaceStr
 
@@ -8,12 +7,33 @@ from scripts.workspace.WorkspaceEnum import WorkspaceStr
 class Subject:
     def __init__(self, subject_path: Path, dim: Union[int, any] = None, quality: Union[int, any] = None) -> None:
         self.__root = subject_path
+
         if dim is None or quality is None:
-            raise NotImplementedError("feature not implemented yet, please provide dim and quality.")
-        self.__dim = dim
-        self.__quality = quality
-        self.__tag = subject_path.joinpath(f".tag_{dim}_{quality}")
+            available_tags = self.__find_available_tags()
+            if len(available_tags) == 0:
+                raise ValueError("No available tags found in the subject folder.")
+
+            elif len(available_tags) == 1:
+                print(f"Found 1 tag : {available_tags[0]}")
+                self.__dim, self.__quality = self.__parse_subject_tags(available_tags[0])
+            else:
+                print("/!\\ More than 1 tag is present, clean the workspace.")
+                raise Exception("Feature not implemented.")
+        else:
+            self.__dim = dim
+            self.__quality = quality
+
+        self.__tag = subject_path.joinpath(f".tag_{self.__dim}_{self.__quality}")
         self.__merged = ".done"
+
+    def __find_available_tags(self) -> List[Path]:
+        tags = list(self.__root.glob(".tag_*"))
+        return tags
+
+    def __parse_subject_tags(self, tag: Path) -> Tuple[int, int]:
+        tag_name = tag.name[5:]
+        dim, quality = tag_name.split("_")
+        return int(dim), int(quality)
 
     def id(self) -> int:
         return int(self.__root.as_posix().split("_")[-1])
@@ -34,8 +54,7 @@ class Subject:
         return self.__root.joinpath(WorkspaceStr.metadata.value)
 
     def reset_metadata(self) -> None:
-        if self.metadata().exists():
-            self.metadata().unlink()
+        self.metadata().unlink(missing_ok=True)
         self.metadata().touch()
 
     def merged_videos_dir(self) -> Path:
@@ -48,13 +67,10 @@ class Subject:
         return self.__root.joinpath(WorkspaceStr.s_frames.value)
 
     def merged_frames_from(self, subject_id: int):
-        return self.__root.joinpath(WorkspaceStr.s_frames.value).joinpath(WorkspaceStr.dst_video.value +
-                                                                          str(subject_id))
+        return self.merged_frames().joinpath(WorkspaceStr.dst_video.value + str(subject_id))
 
     def mask_frames_from(self, subject_id: int):
-        return self.__root.joinpath(WorkspaceStr.s_frames.value). \
-            joinpath(WorkspaceStr.dst_video.value + str(subject_id)). \
-            joinpath(WorkspaceStr.mask.value)
+        return self.merged_frames_from(subject_id).joinpath(WorkspaceStr.mask.value)
 
     def aligned_frames(self) -> Path:
         return self.__root.joinpath(WorkspaceStr.aligned.value)
@@ -72,22 +88,23 @@ class Subject:
         return self.merged_frames_from(subject_id).joinpath(self.__merged).exists()
 
     def clean_alignment(self) -> None:
-        if self.__root.joinpath(WorkspaceStr.aligned.value).exists():
-            shutil.rmtree(self.__root.joinpath(WorkspaceStr.aligned.value))
-        self.__root.joinpath(WorkspaceStr.aligned.value).mkdir(exist_ok=True)
-        tags = self.__root.glob(".tag*")
-        for tag in tags:
+        import shutil
+
+        aligned_dir = self.__root.joinpath(WorkspaceStr.aligned.value)
+        if aligned_dir.exists():
+            shutil.rmtree(aligned_dir)
+        aligned_dir.mkdir(exist_ok=True)
+        for tag in self.__root.glob(".tag*"):
             tag.unlink()
 
     def clean(self):
-        if self.__root.joinpath(WorkspaceStr.s_videos.value).exists():
-            shutil.rmtree(self.__root.joinpath(WorkspaceStr.s_videos.value))
-        if self.__root.joinpath(WorkspaceStr.s_frames.value).exists():
-            shutil.rmtree(self.__root.joinpath(WorkspaceStr.s_frames.value))
-        if self.__root.joinpath(WorkspaceStr.frames.value).exists():
-            shutil.rmtree(self.__root.joinpath(WorkspaceStr.frames.value))
-        tags = self.__root.glob(".tag*")
-        for tag in tags:
+        import shutil
+
+        for directory in [self.__root.joinpath(WorkspaceStr.s_videos.value),
+                          self.__root.joinpath(WorkspaceStr.s_frames.value),
+                          self.__root.joinpath(WorkspaceStr.frames.value)]:
+            if directory.exists():
+                shutil.rmtree(directory)
+        for tag in self.__root.glob(".tag*"):
             tag.unlink()
-        if self.metadata().exists():
-            self.metadata().unlink()
+        self.metadata().unlink(missing_ok=True)
