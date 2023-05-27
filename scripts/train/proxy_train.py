@@ -1,45 +1,11 @@
 from pathlib import Path
-from typing import List, Union
+from typing import Union
 
 from tqdm import tqdm
 
 from scripts.Subject import Subject
+from scripts.train.util import choose_model
 from scripts.workspace.workspace import WorkspaceStr
-
-
-def choose_gpu_index() -> Union[list, List[int]]:
-    from core.leras import nn
-    return nn.ask_choose_device_idxs(
-        choose_only_one=False,
-        allow_cpu=True,
-        suggest_best_multi_gpu=True,
-        suggest_all_gpu=False
-    )
-
-
-def find_models(models_dir: Path) -> List[str]:
-    import os
-    import operator
-    from core import pathex
-
-    saved_models_names = []
-    for filepath in pathex.get_file_paths(models_dir):
-        filepath_name = filepath.name
-        if filepath_name.endswith(f'SAEHD_data.dat'):
-            saved_models_names += [(filepath_name.split('_')[0], os.path.getmtime(filepath))]
-
-    saved_models_names = sorted(saved_models_names, key=operator.itemgetter(1), reverse=True)
-    return [x[0] for x in saved_models_names]
-
-
-def choose_model(model_dir_src: Path, model_name: str) -> str:
-    from core.interact import interact as io
-
-    if model_name == "":
-        files = find_models(model_dir_src)
-        model_name = io.input_str("Choose a model : ", files[0], files,
-                                  help_message="Model that will be used for training")
-    return model_name
 
 
 def save_model_copy(model_name: str, model_dir_src: Path, model_dir_dst: Path) -> None:
@@ -63,7 +29,8 @@ def launch(
         model_dir: Path,
         model_name: str,
         gpu_indexes: any,
-        silent_start: bool = False) -> None:
+        silent_start: bool = False,
+        target_iter_args: Union[int, any] = None) -> None:
     from core import osex
 
     osex.set_process_lowest_prio()
@@ -81,6 +48,7 @@ def launch(
         'silent_start': silent_start,
         'execute_programs': [[int(x[0]), x[1]] for x in []],
         'debug': False,
+        'target_iter_args': target_iter_args
     }
     from mainscripts import Trainer
     Trainer.main(**kwargs)

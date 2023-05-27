@@ -18,6 +18,7 @@ class WorkspaceStr(enum.Enum):
     mask = "mask"
     tmp_save = "tmp_save"
     metadata = "metadata.json"
+    benchmark_csv = "benchmark.csv"
 
 
 from scripts.Subject import Subject
@@ -106,3 +107,31 @@ def update_subjects(subjects: List[Subject]) -> None:
             break
         shutil.move(str(subject.root_dir()), str(subject.root_dir().parent.joinpath(
             WorkspaceStr.subject.value + str(index))))
+
+
+def benchmark_workspace(benchmark_dir: Path, models_name: List[str], max_iteration: int, delta_iteration: int) -> None:
+    import shutil
+
+    if not benchmark_dir.parent.exists():
+        raise NotADirectoryError(f"Benchmark parent dir does not exists : {benchmark_dir.parent}")
+    try:
+        benchmark_dir.mkdir(exist_ok=False)
+    except FileExistsError:
+        if len([f for f in benchmark_dir.iterdir()]) > 0:
+            print(
+                "- Benchmark output directory is not empty ! \n" +
+                "  its content will be removed, save it then press any key."
+            )
+            input(" > waiting for any key to be pressed....")
+            print("-> Continuing...")
+        shutil.rmtree(benchmark_dir)
+        benchmark_dir.mkdir()
+        benchmark_dir.joinpath(WorkspaceStr.benchmark_csv.value).touch()
+    for model_name in models_name:
+        model_dir = benchmark_dir.joinpath(model_name)
+        model_dir.mkdir()
+        model_dir.joinpath(WorkspaceStr.tmp_save.value).mkdir()
+        for iteration_goal in range(delta_iteration, max_iteration + 1, delta_iteration):
+            model_dir.joinpath(str(iteration_goal)).mkdir()
+
+

@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import scripts.train.util
+import scripts.util
 from scripts import args_parser
 from scripts.workspace import workspace
 from scripts.train import proxy_train, face_swap
@@ -41,7 +43,7 @@ def unpack(subjects_dir: Path) -> None:
 def pretrain(
         subjects_dir: Path, dim_output_faces: int, png_quality: int,
         model_dir: Path, model_name: str, model_dir_backup: Path) -> None:
-    model_name = proxy_train.choose_model(model_dir, model_name)
+    model_name = scripts.train.util.choose_model(model_dir, model_name)
     subjects = workspace.load_subjects(subjects_dir, dim_output_faces, png_quality)
     proxy_train.launch(subjects[0], subjects[1], model_dir, model_name, None)
     if model_dir_backup is not None and model_dir_backup.exists() and model_dir_backup.is_dir():
