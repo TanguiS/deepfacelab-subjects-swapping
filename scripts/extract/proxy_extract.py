@@ -3,29 +3,11 @@ from typing import List
 
 from core import osex
 from scripts.Subject import Subject
-from scripts.workspace.WorkspaceEnum import WorkspaceStr
-
-
-def cut_video(input_video: Path):
-    osex.set_process_lowest_prio()
-    from mainscripts import VideoEd
-    input_video = next(input_video.parent.glob(WorkspaceStr.videos.value))
-    VideoEd.cut_video(
-        input_file=input_video,
-        from_time="00:00:00.000",
-        to_time="00:00:10.000",
-        audio_track_id=0,
-        bitrate=16
-    )
-    output = input_video.with_name(input_video.stem+"_cut"+input_video.suffix)
-    if output.exists():
-        input_video.unlink()
-        output.rename(output.with_name(input_video.name))
+from mainscripts import VideoEd, Extractor, Sorter, Util
 
 
 def video_to_frames(input_video: Path, output_dir: Path) -> None:
     osex.set_process_lowest_prio()
-    from mainscripts import VideoEd
     VideoEd.extract_video(
         input_file=input_video,
         output_dir=output_dir,
@@ -34,9 +16,14 @@ def video_to_frames(input_video: Path, output_dir: Path) -> None:
     )
 
 
-def extract_face(input_dir: Path, output_dir: Path, face_type: str, image_size: int, jpeg_quality: int):
+def extract_face(
+    input_dir: Path,
+    output_dir: Path,
+    face_type: str,
+    image_size: int,
+    jpeg_quality: int
+) -> None:
     osex.set_process_lowest_prio()
-    from mainscripts import Extractor
     Extractor.main(
         detector='s3fd',
         input_path=input_dir,
@@ -56,7 +43,6 @@ def extract_face(input_dir: Path, output_dir: Path, face_type: str, image_size: 
 
 def sort_dir_by_hist(input_dir: Path):
     osex.set_process_lowest_prio()
-    from mainscripts import Sorter
     Sorter.main(
         input_path=input_dir,
         sort_by_method='hist'
@@ -65,7 +51,6 @@ def sort_dir_by_hist(input_dir: Path):
 
 def recover_aligned_name(subject: Subject):
     osex.set_process_lowest_prio()
-    from mainscripts import Util
     Util.recover_original_aligned_filename(subject.aligned_frames())
 
 
@@ -74,18 +59,19 @@ def launch(subjects: List[Subject], face_type: str, image_size: int, jpeg_qualit
     for subject in subjects:
         if subject.is_extract_done():
             continue
-        else:
-            subject.clean_alignment()
-        # cut_video(subject.video())
+        subject.clean_alignment()
         video_to_frames(subject.original_video(), subject.original_frames())
         extract_face(subject.original_frames(), subject.aligned_frames(), face_type, image_size, jpeg_quality)
         sort_dir_by_hist(subject.aligned_frames())
         subject.extract_done()
         to_recover.append(subject)
+
     if len(to_recover) == 0:
         return
+
     print("Manually Clean the Aligned face-set, then press [Enter] to continue...")
     input()
     print("Continuing...")
+
     for subject in to_recover:
         recover_aligned_name(subject)
