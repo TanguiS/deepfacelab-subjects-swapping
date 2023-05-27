@@ -27,14 +27,30 @@ def args_parser() -> Dict[str, any]:
 
     swap_action_parser(subparsers)
 
+    benchmark_action_parser(subparsers)
+
     return vars(parser.parse_args())
+
+
+def benchmark_action_parser(subparsers):
+    parser_benchmark = subparsers.add_parser("benchmark", help="Perform benchmarking on all available SAEHD models.")
+    parser_benchmark.add_argument("--subjects_dir", type=Path, help="Path to the subjects directory")
+    parser_benchmark.add_argument("--subject_src_id", type=int, help="Id of source subject to perform benchmark.")
+    parser_benchmark.add_argument("--subject_dst_id", type=int, help="Id of destination subject to perform benchmark.")
+    parser_benchmark.add_argument("--model_dir", type=Path, help="Path to the models directory")
+    parser_benchmark.add_argument("--benchmark_output_path_results", type=Path, help="Path to save the benchmark " +
+                                                                                     "results, the folder need to be " +
+                                                                                     "empty and does not need to " +
+                                                                                     "exists only the parent folder " +
+                                                                                     "needs to.")
+    parser_benchmark.add_argument("--iteration_goal", type=int, help="Integer of the last iteration to be performed.")
+    parser_benchmark.add_argument("--delta_iteration", type=int, help="Integer of the iterations between each " +
+                                                                      "benchmarking.")
 
 
 def swap_action_parser(subparsers):
     parser_swap = subparsers.add_parser("swap", help="Face swapping")
     parser_swap.add_argument("--subjects_dir", type=Path, help="Path to the subjects directory")
-    parser_swap.add_argument("--dim_output_faces", type=int, help="Dimension of the output faces")
-    parser_swap.add_argument("--png_quality", type=int, help="Quality of the extracted images")
     parser_swap.add_argument("--model_dir", type=Path, help="Path to the models directory")
     parser_swap.add_argument("--model_name", type=str, default="", help="Name of the SAEHD model")
 
@@ -42,8 +58,6 @@ def swap_action_parser(subparsers):
 def pretrain_action_parser(subparsers):
     parser_pretrain = subparsers.add_parser("pretrain", help="Pretrain model")
     parser_pretrain.add_argument("--subjects_dir", type=Path, help="Path to the subjects directory")
-    parser_pretrain.add_argument("--dim_output_faces", type=int, help="Dimension of the output faces")
-    parser_pretrain.add_argument("--png_quality", type=int, help="Quality of the extracted images")
     parser_pretrain.add_argument("--model_dir", type=Path, help="Path to the models directory")
     parser_pretrain.add_argument("--model_name", type=str, default="", help="Name of the SAEHD model")
     parser_pretrain.add_argument("--model_dir_backup", type=Path, help="Path to the model backup directory")
@@ -57,8 +71,6 @@ def unpack_action_parser(subparsers):
 def pack_action_parser(subparsers):
     parser_pack = subparsers.add_parser("pack", help="Pack extracted faces")
     parser_pack.add_argument("--subjects_dir", type=Path, help="Path to the subjects directory")
-    parser_pack.add_argument("--dim_output_faces", type=int, help="Dimension of the output faces")
-    parser_pack.add_argument("--png_quality", type=int, help="Quality of the extracted images")
 
 
 def extract_action_parser(subparsers):
@@ -71,15 +83,11 @@ def extract_action_parser(subparsers):
 def update_subject_workspace_action_parser(subparsers):
     parser_update_wrk = subparsers.add_parser("update_wrk", help="Update workspace")
     parser_update_wrk.add_argument("--subjects_dir", type=Path, help="Path to the subjects directory")
-    parser_update_wrk.add_argument("--dim_output_faces", type=int, help="Dimension of the output faces")
-    parser_update_wrk.add_argument("--png_quality", type=int, help="Quality of the extracted images")
 
 
 def clean_action_parser(subparsers):
     parser_clean = subparsers.add_parser("clean", help="Clean workspace")
     parser_clean.add_argument("--subjects_dir", type=Path, help="Path to the subjects directory")
-    parser_clean.add_argument("--dim_output_faces", type=int, help="Dimension of the output faces")
-    parser_clean.add_argument("--png_quality", type=int, help="Quality of the extracted images")
 
 
 def to_subject_action_parser(subparsers):

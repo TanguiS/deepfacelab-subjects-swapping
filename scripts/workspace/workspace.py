@@ -1,11 +1,11 @@
 import shutil
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 from tqdm import tqdm
 
-from scripts.workspace.WorkspaceEnum import WorkspaceStr
 from scripts.Subject import Subject
+from scripts.workspace.WorkspaceEnum import WorkspaceStr
 
 
 def videos_to_subject(input_videos_dir: Path, output_subjects_dir: Path) -> None:
@@ -58,10 +58,11 @@ def clean_subjects_workspace(subjects: List[Subject]) -> None:
         subject.clean()
 
 
-def load_subjects(subjects_path: Path, dim: int, quality: int) -> List[Subject]:
+def load_subjects(subjects_path: Path, dim: Optional[int] = None, quality: Optional[int] = None) -> List[Subject]:
     subjects = []
     subjects_path_list = [item for item in subjects_path.glob(WorkspaceStr.subject.value + "*")]
-    for curr in tqdm(subjects_path_list, total=len(subjects_path_list), desc="loading subjects", miniters=1.0, unit="subject"):
+    for curr in tqdm(subjects_path_list, total=len(subjects_path_list), desc="loading subjects", miniters=1.0,
+                     unit="subject"):
         subjects.append(Subject(curr, dim, quality))
     return subjects
 
