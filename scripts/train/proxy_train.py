@@ -1,8 +1,6 @@
 from pathlib import Path
 from typing import Union
-
 from tqdm import tqdm
-
 from scripts.Subject import Subject
 from scripts.train.util import choose_model
 from scripts.workspace.WorkspaceEnum import WorkspaceStr
@@ -24,14 +22,16 @@ def save_model_copy(model_name: str, model_dir_src: Path, model_dir_dst: Path) -
 
 
 def launch(
-        subject_src: Subject,
-        subject_dst: Subject,
-        model_dir: Path,
-        model_name: str,
-        gpu_indexes: any,
-        silent_start: bool = False,
-        target_iter_args: Union[int, any] = None) -> None:
+    subject_src: Subject,
+    subject_dst: Subject,
+    model_dir: Path,
+    model_name: str,
+    gpu_indexes: any,
+    silent_start: bool = False,
+    target_iter_args: Union[int, any] = None
+) -> None:
     from core import osex
+    from mainscripts import Trainer
 
     osex.set_process_lowest_prio()
     kwargs = {
@@ -42,13 +42,13 @@ def launch(
         'pretraining_data_path': subject_src.root_dir().parent.joinpath(WorkspaceStr.pretrain.value),
         'pretrained_model_path': None,
         'no_preview': False,
-        'force_model_name': model_name if not "" else None,
+        'force_model_name': model_name or None,
         'force_gpu_idxs': gpu_indexes,
         'cpu_only': None,
         'silent_start': silent_start,
-        'execute_programs': [[int(x[0]), x[1]] for x in []],
+        'execute_programs': [],
         'debug': False,
         'target_iter_args': target_iter_args
     }
-    from mainscripts import Trainer
+
     Trainer.main(**kwargs)
