@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Union
 
 import scripts.train.util
 import scripts.util
@@ -49,9 +50,14 @@ def pretrain(subjects_dir: Path, model_dir: Path, model_name: str, model_dir_bac
         proxy_train.save_model_copy(model_name, model_dir, model_dir_backup)
 
 
-def face_swap_action(subjects_dir: Path, model_dir: Path, model_name: str) -> None:
+def face_swap_action(
+        subjects_dir: Path,
+        model_dir: Path,
+        model_name: str,
+        iteration_goal: Union[int, any] = None
+) -> None:
     subjects = workspace.load_subjects(subjects_dir)
-    face_swap.launch(subjects, model_dir, model_name)
+    face_swap.launch(subjects, model_dir, model_name, iteration_goal)
 
 
 def bench(
@@ -101,7 +107,7 @@ if __name__ == '__main__':
         "pack": (pack, {'subjects_dir'}),
         "unpack": (unpack, {'subjects_dir'}),
         "pretrain": (pretrain, {'subjects_dir', 'model_dir', 'model_name', 'model_dir_backup'}),
-        "swap": (face_swap_action, {'subjects_dir', 'model_dir', 'model_name'}),
+        "swap": (face_swap_action, {'subjects_dir', 'model_dir', 'model_name', 'iteration_goal'}),
         "benchmark": (bench, {
             'subjects_dir',
             'subject_src_id',

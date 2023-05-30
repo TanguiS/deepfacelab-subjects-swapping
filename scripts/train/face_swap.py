@@ -18,9 +18,10 @@ def face_swap_train(
     model_dir: Path,
     model_name: str,
     gpu_indexes: Union[list, List[int]],
-    silent_start: bool = False
+    silent_start: bool = False,
+    iteration_goal: Union[int, any] = None,
 ) -> None:
-    proxy_train.launch(subject_src, subject_dst, model_dir, model_name, gpu_indexes, silent_start)
+    proxy_train.launch(subject_src, subject_dst, model_dir, model_name, gpu_indexes, silent_start, iteration_goal)
 
 
 def setup(model_dir: Path, model_name: str, gpu_indexes: Union[list, List[int]], subject: Subject) -> None:
@@ -96,10 +97,11 @@ def merge_mp4(subject_src: Subject, subject_dst: Subject) -> None:
     )
 
 
-def launch(subjects: List[Subject], model_dir: Path, model_name: str) -> None:
+def launch(subjects: List[Subject], model_dir: Path, model_name: str, iteration_goal: Union[int, any] = None) -> None:
     model_name = util.choose_model(model_dir, model_name)
     gpu_indexes = util.choose_gpu_index()
-    setup(model_dir, model_name, gpu_indexes, subjects[0])
+    if iteration_goal is None:
+        setup(model_dir, model_name, gpu_indexes, subjects[0])
     for i, subject_src in enumerate(subjects):
         for j, subject_dst in enumerate(subjects):
             if i == j or subject_src.is_merged_from_is_done(subject_dst.id()):
@@ -108,7 +110,7 @@ def launch(subjects: List[Subject], model_dir: Path, model_name: str) -> None:
             swap_model(model_dir, model_name)
 
             process = multiprocessing.Process(target=face_swap_train, args=(
-                subject_src, subject_dst, model_dir, model_name, gpu_indexes, silent_start
+                subject_src, subject_dst, model_dir, model_name, gpu_indexes, silent_start, iteration_goal
             ))
             process.start()
             process.join()
