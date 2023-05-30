@@ -61,24 +61,27 @@ def clean_subjects_workspace(subjects: List[Subject]) -> None:
 def load_subjects(subjects_path: Path, dim: Optional[int] = None, quality: Optional[int] = None) -> List[Subject]:
     subjects = []
     subjects_path_list = [item for item in subjects_path.glob(WorkspaceStr.subject.value + "*")]
-    for curr in tqdm(subjects_path_list, total=len(subjects_path_list), desc="loading subjects", miniters=1.0,
-                     unit="subject"):
+    for curr in subjects_path_list:
         subjects.append(Subject(curr, dim, quality))
     return subjects
 
 
 def update_subjects(subjects: List[Subject]) -> None:
     max_id = len(subjects)
+    remaining_id = {subject.id() for subject in subjects}
     for subject in subjects:
         if subject.id() <= max_id:
             continue
         index = 1
         for i in range(1, max_id + 1):
-            if i == subject.id():
+            if i in remaining_id:
                 continue
             index = i
+            remaining_id.add(index)
             break
-        shutil.move(str(subject.root_dir()), str(subject.root_dir().parent.joinpath(WorkspaceStr.subject.value + str(index))))
+        dst = str(subject.root_dir().parent.joinpath(WorkspaceStr.subject.value + str(index)))
+        print(f"moving: {subject.root_dir()} to {dst}")
+        shutil.move(str(subject.root_dir()), dst)
 
 
 def benchmark_workspace(benchmark_dir: Path, models_name: List[str], max_iteration: int, delta_iteration: int) -> None:

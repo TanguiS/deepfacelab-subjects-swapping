@@ -14,7 +14,7 @@
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/auto_main.py" />
-    <option name="PARAMETERS" value="-a &quot;pretrain&quot; --subjects_dir &quot;/media/tangui/CA1EF5E61EF5CC07/ubuntu_drive/DeepFaceLab_data/my_data/subjects&quot; --dim_output_faces 1024 --png_quality 90 --model_dir &quot;/media/tangui/CA1EF5E61EF5CC07/ubuntu_drive/DeepFaceLab_data/my_data/model_on_subjects&quot; --model_dir_backup &quot;/media/tangui/CA1EF5E61EF5CC07/ubuntu_drive/DeepFaceLab_data/my_data/model_on_subjects/pretrain_save&quot;" />
+    <option name="PARAMETERS" value="pretrain --subjects_dir &quot;/media/tangui/CA1EF5E61EF5CC07/ubuntu_drive/DeepFaceLab_data/my_data/subjects&quot; --model_dir &quot;/media/tangui/CA1EF5E61EF5CC07/ubuntu_drive/DeepFaceLab_data/my_data/model_on_subjects&quot; --model_dir_backup &quot;/media/tangui/CA1EF5E61EF5CC07/ubuntu_drive/DeepFaceLab_data/my_data/model_on_subjects/pretrain_save&quot;" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="true" />
     <option name="MODULE_MODE" value="false" />

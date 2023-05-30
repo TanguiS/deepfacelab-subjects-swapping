@@ -69,6 +69,6 @@ def find_models(models_dir: Path) -> List[str]:
 def choose_model(model_dir_src: Path, model_name: str) -> str:
     if model_name == "":
         files = find_models(model_dir_src)
-        model_name = io.input_str("Choose a model: ", default=files[0], choices=files,
+        model_name = io.input_str("Choose a model: ", default_value=files[0], valid_list=files,
                                   help_message="Model that will be used for training")
     return model_name

@@ -61,15 +61,18 @@ class SAEHDModel(ModelBase):
         default_clipgrad           = self.options['clipgrad']           = self.load_or_def_option('clipgrad', False)
         default_pretrain           = self.options['pretrain']           = self.load_or_def_option('pretrain', False)
 
+        if self.target_iter_args is not None:
+            self.options['target_iter'] = self.target_iter_args
+            self.options['pretrain'] = False
+            io.log_info(f"Target iteration given by args : {self.options['target_iter']}, pretrain set to false")
+
         ask_override = self.ask_override()
+
         if self.is_first_run() or ask_override:
             self.ask_autobackup_hour()
             self.ask_write_preview_history()
             if self.target_iter_args is None:
                 self.ask_target_iter()
-            else:
-                self.options['target_iter'] = self.target_iter_args
-                io.log_info(f"Target iteration given by args : {self.options['target_iter']}")
             self.ask_random_src_flip()
             self.ask_random_dst_flip()
             self.ask_batch_size(suggest_batch_size)

@@ -107,4 +107,8 @@ class Subject:
                 shutil.rmtree(directory)
         for tag in self.__root.glob(".tag*"):
             tag.unlink()
-        self.metadata().unlink(missing_ok=True)
+        if self.metadata().exists():
+            self.metadata().unlink(missing_ok=True)
+
+    def __str__(self) -> str:
+        return f"subject id : {self.id()}"

@@ -94,15 +94,15 @@ if __name__ == '__main__':
     print("args : ", args)
 
     actions = {
-        "to_subject": (videos_to_subjects, ('videos_dir', 'subjects_dir')),
-        "update_wrk": (update_workspace, 'subjects_dir'),
-        "clean": (clean_workspace, 'subjects_dir'),
-        "extract": (extract, ('subjects_dir', 'dim_output_faces', 'png_quality')),
-        "pack": (pack, 'subjects_dir'),
-        "unpack": (unpack, 'subjects_dir'),
-        "pretrain": (pretrain, ('subjects_dir', 'model_dir', 'model_name', 'model_dir_backup')),
-        "swap": (face_swap_action, ('subjects_dir', 'model_dir', 'model_name')),
-        "benchmark": (bench, (
+        "to_subject": (videos_to_subjects, {'videos_dir', 'subjects_dir'}),
+        "update_wrk": (update_workspace, {'subjects_dir'}),
+        "clean": (clean_workspace, {'subjects_dir'}),
+        "extract": (extract, {'subjects_dir', 'dim_output_faces', 'png_quality'}),
+        "pack": (pack, {'subjects_dir'}),
+        "unpack": (unpack, {'subjects_dir'}),
+        "pretrain": (pretrain, {'subjects_dir', 'model_dir', 'model_name', 'model_dir_backup'}),
+        "swap": (face_swap_action, {'subjects_dir', 'model_dir', 'model_name'}),
+        "benchmark": (bench, {
             'subjects_dir',
             'subject_src_id',
             'subject_dst_id',
@@ -110,7 +110,7 @@ if __name__ == '__main__':
             'benchmark_output_path_results',
             'iteration_goal',
             'delta_iteration'
-        ))
+        })
     }
 
     action = args["action"]
@@ -120,4 +120,5 @@ if __name__ == '__main__':
         raise NotImplementedError(f"Action : '{action}' is not handled.")
 
     kwargs = {arg: args[arg] for arg in action_args}
+
     action_fn(**kwargs)
