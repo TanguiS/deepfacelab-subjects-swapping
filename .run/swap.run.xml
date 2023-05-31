@@ -6,7 +6,7 @@
     <envs>
       <env name="PYTHONUNBUFFERED" value="1" />
     </envs>
-    <option name="SDK_HOME" value="$USER_HOME$/anaconda3/envs/deepfacelab/bin/python" />
+    <option name="SDK_HOME" value="C:\Users\tangu\anaconda3\envs\deepfacelab\python.exe" />
     <option name="SDK_NAME" value="deepfacelab" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
     <option name="IS_MODULE_SDK" value="false" />
@@ -14,7 +14,7 @@
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/auto_main.py" />
-    <option name="PARAMETERS" value="swap --subjects_dir &quot;/media/tangui/CA1EF5E61EF5CC07/ubuntu_drive/DeepFaceLab_data/my_data/subjects&quot; --model_dir &quot;/media/tangui/CA1EF5E61EF5CC07/ubuntu_drive/DeepFaceLab_data/my_data/model_on_subjects&quot; --model_dir_backup &quot;/media/tangui/CA1EF5E61EF5CC07/ubuntu_drive/DeepFaceLab_data/my_data/model_on_subjects/pretrain_save&quot;" />
+    <option name="PARAMETERS" value="swap --subjects_dir &quot;/media/tangui/CA1EF5E61EF5CC07/ubuntu_drive/DeepFaceLab_data/my_data/subjects&quot; --model_dir &quot;/media/tangui/CA1EF5E61EF5CC07/ubuntu_drive/DeepFaceLab_data/my_data/model_on_subjects&quot; --model_dir_backup &quot;/media/tangui/CA1EF5E61EF5CC07/ubuntu_drive/DeepFaceLab_data/my_data/model_on_subjects/pretrain_save&quot; --iteration_goal 1000" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="true" />
     <option name="MODULE_MODE" value="false" />

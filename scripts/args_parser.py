@@ -1,12 +1,12 @@
 import argparse
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Union
 
 
 def args_parser() -> Dict[str, any]:
     parser = argparse.ArgumentParser(
         prog="argparse, args_parser.py",
-        description="Args parser for automatic face swapping scripts according to an end condition",
+        description="Args parser for automatic mass face swapping",
     )
 
     subparsers = parser.add_subparsers(title="Action", dest="action")
@@ -53,6 +53,9 @@ def swap_action_parser(subparsers):
     parser_swap.add_argument("--subjects_dir", type=Path, help="Path to the subjects directory")
     parser_swap.add_argument("--model_dir", type=Path, help="Path to the models directory")
     parser_swap.add_argument("--model_name", type=str, default="", help="Name of the SAEHD model")
+    parser_swap.add_argument("--iteration_goal", type=Union[int, any], default=None, help="Iteration to reach " +
+                                                                                          " for each face swapping " +
+                                                                                          "operation")
 
 
 def pretrain_action_parser(subparsers):
