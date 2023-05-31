@@ -1,9 +1,10 @@
 import csv
+import random
 from pathlib import Path
-from typing import Generator, List
+from typing import Generator, List, Tuple
 
 
-def frames_to_evaluate(benchmark_dir: Path) -> Generator[Path, Path]:
+def frames_to_evaluate(benchmark_dir: Path) -> Generator[Tuple[Path], None, None]:
     frames = {frames for frames in benchmark_dir.rglob("*.png")}
     reference_face = benchmark_dir.joinpath("reference_face.png")
     frames.remove(reference_face)
@@ -25,4 +26,14 @@ def write_threshold_results(benchmark_dir: Path, threshold: List[float]) -> None
         writer = csv.writer(f)
         writer.writerows(lines)
 
+
+if __name__ == '__main__':
+    benchmark_dir = Path("/media/tangui/CA1EF5E61EF5CC07/ubuntu_drive/DeepFaceLab_data/my_data/benchmark")
+    thres = []
+    for ref, frame in frames_to_evaluate(benchmark_dir):
+        print(f"ref : {ref}, frame : {frame}")
+        rd = random.random()
+        print(f"  -> random value affected : {rd}")
+        thres.append(rd)
+    # write_threshold_results(benchmark_dir, thres)
 
