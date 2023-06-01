@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="benchmark" type="PythonConfigurationType" factoryName="Python">
+  <configuration default="false" name="face swap benchmark" type="PythonConfigurationType" factoryName="Python">
     <module name="DeepFaceLab" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />

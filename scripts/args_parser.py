@@ -27,13 +27,24 @@ def args_parser() -> Dict[str, any]:
 
     swap_action_parser(subparsers)
 
-    benchmark_action_parser(subparsers)
+    face_swap_benchmark_action_parser(subparsers)
+
+    similarity_score_benchmark_action_parser(subparsers)
 
     return vars(parser.parse_args())
 
 
-def benchmark_action_parser(subparsers):
-    parser_benchmark = subparsers.add_parser("benchmark", help="Perform benchmarking on all available SAEHD models.")
+def similarity_score_benchmark_action_parser(subparsers):
+    parser_benchmark = subparsers.add_parser("similarity_score_benchmark", help="Perform Data augmentation for " +
+                                                                                "similarity score" +
+                                                                                " benchmarking.")
+    parser_benchmark.add_argument("--similarity_score_benchmark_dir", type=Path)
+    parser_benchmark.add_argument("--number_data_augmentation_loop", type=int)
+
+
+def face_swap_benchmark_action_parser(subparsers):
+    parser_benchmark = subparsers.add_parser("face_swap_benchmark",
+                                             help="Perform benchmarking on all available SAEHD models.")
     parser_benchmark.add_argument("--subjects_dir", type=Path, help="Path to the subjects directory")
     parser_benchmark.add_argument("--subject_src_id", type=int, help="Id of source subject to perform benchmark.")
     parser_benchmark.add_argument("--subject_dst_id", type=int, help="Id of destination subject to perform benchmark.")

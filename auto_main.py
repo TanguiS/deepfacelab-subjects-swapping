@@ -8,7 +8,7 @@ from scripts.workspace import workspace
 from scripts.train import proxy_train, face_swap
 from scripts.extract import proxy_extract, facet_pack, facet_unpack
 from scripts.workspace.WorkspaceEnum import WorkspaceStr
-from scripts.benchmark import benchmark
+from scripts.benchmark import face_swap_benchmark, similarity_score_benchmark
 
 
 def videos_to_subjects(videos_dir: Path, subjects_dir: Path) -> None:
@@ -60,7 +60,7 @@ def face_swap_action(
     face_swap.launch(subjects, model_dir, model_name, iteration_goal)
 
 
-def bench(
+def face_swap_bench(
         subjects_dir: Path,
         subject_src_id: int,
         subject_dst_id: int,
@@ -78,7 +78,7 @@ def bench(
             subject_dst = subject
     if subject_src is None or subject_dst is None:
         raise IndexError(f"Wrong given indexes from src: {subject_src_id} or dst: {subject_dst_id}")
-    benchmark.launch(
+    face_swap_benchmark.launch(
         subject_src,
         subject_dst,
         model_dir,
@@ -86,6 +86,10 @@ def bench(
         iteration_goal,
         delta_iteration
     )
+
+
+def similarity_score_bench(similarity_score_benchmark_dir: Path, number_data_augmentation_loop: int) -> None:
+    similarity_score_benchmark.launch(similarity_score_benchmark_dir, number_data_augmentation_loop)
 
 
 if __name__ == '__main__':
@@ -108,7 +112,7 @@ if __name__ == '__main__':
         "unpack": (unpack, {'subjects_dir'}),
         "pretrain": (pretrain, {'subjects_dir', 'model_dir', 'model_name', 'model_dir_backup'}),
         "swap": (face_swap_action, {'subjects_dir', 'model_dir', 'model_name', 'iteration_goal'}),
-        "benchmark": (bench, {
+        "face_swap_benchmark": (face_swap_bench, {
             'subjects_dir',
             'subject_src_id',
             'subject_dst_id',
@@ -116,7 +120,8 @@ if __name__ == '__main__':
             'benchmark_output_path_results',
             'iteration_goal',
             'delta_iteration'
-        })
+        }),
+        "similarity_score_benchmark": (similarity_score_bench, {'similarity_score_benchmark_dir', 'number_data_augmentation_loop'})
     }
 
     action = args["action"]
