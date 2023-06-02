@@ -36,21 +36,18 @@ def videos_to_subject(input_videos_dir: Path, output_subjects_dir: Path) -> None
 
 
 def create_subject_workspace(subjects_path: Path, dim: int, quality: int) -> None:
-    subjects = []
-    subjects_path.joinpath(WorkspaceStr.pretrain.value).mkdir(exist_ok=True)
-    subjects_path = [path for path in subjects_path.glob(WorkspaceStr.subject.value + "*")]
-    for curr in subjects_path:
-        for folder_name in (WorkspaceStr.frames, WorkspaceStr.aligned, WorkspaceStr.s_frames, WorkspaceStr.s_videos):
-            path = curr.joinpath(folder_name.value)
-            path.mkdir(exist_ok=True)
-        subjects.append(Subject(curr, dim, quality))
-        for i, subject in enumerate(subjects):
-            if i == subject.id() - 1:
+    subjects = load_subjects(subjects_path, dim, quality)
+
+    for subject_1 in subjects:
+        subject_1.original_frames().mkdir(exist_ok=True)
+        subject_1.aligned_frames().mkdir(exist_ok=True)
+        subject_1.merged_frames().mkdir(exist_ok=True)
+        subject_1.merged_videos_dir().mkdir(exist_ok=True)
+        for subject_2 in subjects:
+            if subject_1 == subject_2:
                 continue
-            sub = subject.merged_frames().joinpath(WorkspaceStr.dst_video.value + str(i + 1))
-            sub.mkdir(exist_ok=True)
-            sub2 = sub.joinpath(WorkspaceStr.mask.value)
-            sub2.mkdir(exist_ok=True)
+            subject_1.merged_frames_from(subject_2.id()).mkdir(exist_ok=True)
+            subject_1.mask_frames_from(subject_2.id()).mkdir(exist_ok=True)
 
 
 def clean_subjects_workspace(subjects: List[Subject]) -> None:

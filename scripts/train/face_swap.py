@@ -27,8 +27,7 @@ def face_swap_train(
 def setup(model_dir: Path, model_name: str, gpu_indexes: Union[list, List[int]], subject: Subject) -> None:
     dim, quality = subject.specs()
     command = [
-        "python", "auto_main.py", "--action", "pretrain",
-        "--dim_output_faces", str(dim), "--png_quality", str(quality),
+        "python", "auto_main.py", "pretrain",
         "--model_dir", str(model_dir), "--model_name", model_name, "--subjects_dir", str(subject.root_dir().parent)
     ]
     command_str = " ".join(command)

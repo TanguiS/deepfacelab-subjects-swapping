@@ -64,7 +64,7 @@ def swap_action_parser(subparsers):
     parser_swap.add_argument("--subjects_dir", type=Path, help="Path to the subjects directory")
     parser_swap.add_argument("--model_dir", type=Path, help="Path to the models directory")
     parser_swap.add_argument("--model_name", type=str, default="", help="Name of the SAEHD model")
-    parser_swap.add_argument("--iteration_goal", type=Union[int, any], default=None, help="Iteration to reach " +
+    parser_swap.add_argument("--iteration_goal", type=int, default=None, help="Iteration to reach " +
                                                                                           " for each face swapping " +
                                                                                           "operation")
 
@@ -102,6 +102,7 @@ def update_subject_workspace_action_parser(subparsers):
 def clean_action_parser(subparsers):
     parser_clean = subparsers.add_parser("clean", help="Clean workspace")
     parser_clean.add_argument("--subjects_dir", type=Path, help="Path to the subjects directory")
+    parser_clean.add_argument("--redo_merged_workspace", action='store_true')
 
 
 def to_subject_action_parser(subparsers):

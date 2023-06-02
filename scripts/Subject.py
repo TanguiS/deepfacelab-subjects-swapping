@@ -97,6 +97,14 @@ class Subject:
         for tag in self.__root.glob(".tag*"):
             tag.unlink()
 
+    def clean_workspace(self) -> None:
+        import shutil
+
+        if self.merged_frames().exists():
+            shutil.rmtree(self.merged_frames())
+        if self.merged_videos_dir().exists():
+            shutil.rmtree(self.merged_videos_dir())
+
     def clean(self):
         import shutil
 

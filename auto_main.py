@@ -20,8 +20,14 @@ def update_workspace(subjects_dir: Path):
     workspace.update_subjects(subjects)
 
 
-def clean_workspace(subjects_dir: Path) -> None:
+def clean_workspace(subjects_dir: Path, redo_merged_workspace: bool) -> None:
     subjects = workspace.load_subjects(subjects_dir)
+    if redo_merged_workspace:
+        for subject in subjects:
+            subject.clean_workspace()
+        dim, quality = subjects[0].specs()
+        workspace.create_subject_workspace(subjects_dir, dim, quality)
+        return
     workspace.clean_subjects_workspace(subjects)
 
 
@@ -106,7 +112,7 @@ if __name__ == '__main__':
     actions = {
         "to_subject": (videos_to_subjects, {'videos_dir', 'subjects_dir'}),
         "update_wrk": (update_workspace, {'subjects_dir'}),
-        "clean": (clean_workspace, {'subjects_dir'}),
+        "clean": (clean_workspace, {'subjects_dir', 'redo_merged_workspace'}),
         "extract": (extract, {'subjects_dir', 'dim_output_faces', 'png_quality'}),
         "pack": (pack, {'subjects_dir'}),
         "unpack": (unpack, {'subjects_dir'}),
