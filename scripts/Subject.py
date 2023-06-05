@@ -45,7 +45,13 @@ class Subject:
         return self.__root
 
     def original_video(self) -> Path:
-        return self.__root.joinpath(WorkspaceStr.videos.value)
+        output = [video for video in self.__root.glob(WorkspaceStr.videos.value)]
+        if len(output) > 1:
+            raise KeyError(f"Error, multiple videos found for pattern : {WorkspaceStr.videos.value}, videos found : " +
+                           f"{output} in subject id {self.id()}")
+        if len(output) == 0:
+            raise KeyError(f"Error, no original video found in subject id : {self.id()}.")
+        return output[0]
 
     def original_frames(self) -> Path:
         return self.__root.joinpath(WorkspaceStr.frames.value)
@@ -54,14 +60,15 @@ class Subject:
         return self.__root.joinpath(WorkspaceStr.metadata.value)
 
     def reset_metadata(self) -> None:
-        self.metadata().unlink(missing_ok=True)
+        if self.metadata().exists():
+            self.metadata().unlink()
         self.metadata().touch()
 
     def merged_videos_dir(self) -> Path:
         return self.__root.joinpath(WorkspaceStr.s_videos.value)
 
     def merged_videos_from(self, subject_id: int) -> Path:
-        return self.merged_frames().joinpath(f"result_from_{subject_id}.mp4")
+        return self.merged_videos_dir().joinpath(f"result_from_{subject_id}.mp4")
 
     def merged_frames(self) -> Path:
         return self.__root.joinpath(WorkspaceStr.s_frames.value)

@@ -9,6 +9,7 @@ from scripts.train import proxy_train, face_swap
 from scripts.extract import proxy_extract, facet_pack, facet_unpack
 from scripts.workspace.WorkspaceEnum import WorkspaceStr
 from scripts.benchmark import face_swap_benchmark, similarity_score_benchmark
+from scripts.workspace import metadata_pack as metapack
 
 
 def videos_to_subjects(videos_dir: Path, subjects_dir: Path) -> None:
@@ -94,8 +95,9 @@ def face_swap_bench(
     )
 
 
-def similarity_score_bench(similarity_score_benchmark_dir: Path, number_data_augmentation_loop: int) -> None:
-    similarity_score_benchmark.launch(similarity_score_benchmark_dir, number_data_augmentation_loop)
+def metadata_pack(subjects_dir: Path) -> None:
+    subjects = workspace.load_subjects(subjects_dir)
+    metapack.create_metadata(subjects)
 
 
 if __name__ == '__main__':
@@ -127,7 +129,7 @@ if __name__ == '__main__':
             'iteration_goal',
             'delta_iteration'
         }),
-        "similarity_score_benchmark": (similarity_score_bench, {'similarity_score_benchmark_dir', 'number_data_augmentation_loop'})
+        "metadata_pack": (metadata_pack, {'subjects_dir'})
     }
 
     action = args["action"]

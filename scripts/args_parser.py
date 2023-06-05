@@ -29,17 +29,15 @@ def args_parser() -> Dict[str, any]:
 
     face_swap_benchmark_action_parser(subparsers)
 
-    similarity_score_benchmark_action_parser(subparsers)
+    metadata_pack_action_parser(subparsers)
 
     return vars(parser.parse_args())
 
 
-def similarity_score_benchmark_action_parser(subparsers):
-    parser_benchmark = subparsers.add_parser("similarity_score_benchmark", help="Perform Data augmentation for " +
-                                                                                "similarity score" +
-                                                                                " benchmarking.")
-    parser_benchmark.add_argument("--similarity_score_benchmark_dir", type=Path)
-    parser_benchmark.add_argument("--number_data_augmentation_loop", type=int)
+def metadata_pack_action_parser(subparsers):
+    parser_metadata_pack = subparsers.add_parser("metadata_pack", help="Perform the creation of metadata.json file " +
+                                                                       "for original and merged video referencing.")
+    parser_metadata_pack.add_argument("--subjects_dir", type=Path, help="Path to the subjects directory")
 
 
 def face_swap_benchmark_action_parser(subparsers):
@@ -65,8 +63,8 @@ def swap_action_parser(subparsers):
     parser_swap.add_argument("--model_dir", type=Path, help="Path to the models directory")
     parser_swap.add_argument("--model_name", type=str, default="", help="Name of the SAEHD model")
     parser_swap.add_argument("--iteration_goal", type=int, default=None, help="Iteration to reach " +
-                                                                                          " for each face swapping " +
-                                                                                          "operation")
+                                                                              " for each face swapping " +
+                                                                              "operation")
 
 
 def pretrain_action_parser(subparsers):

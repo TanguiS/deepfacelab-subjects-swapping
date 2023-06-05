@@ -1,4 +1,5 @@
 import json
+import os
 from typing import List, Union, Dict, Optional
 from tqdm import tqdm
 from scripts.Subject import Subject
@@ -23,7 +24,7 @@ def create_metadata(subjects: List[Subject]) -> None:
         for subject_dst in subjects:
             if subject_dst == subject_src:
                 continue
-            fake = str(subject_src.merged_videos_from(subject_dst.id()).relative_to(subject_src.root_dir()))
+            fake = subject_src.merged_videos_from(subject_dst.id()).relative_to(subject_src.root_dir()).as_posix()
             original = subject_dst.original_video().name
             data[fake] = value("FAKE", "train", original)
 
