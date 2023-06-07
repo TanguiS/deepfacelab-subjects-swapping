@@ -54,16 +54,16 @@ def recover_aligned_name(subject: Subject):
     Util.recover_original_aligned_filename(subject.aligned_frames())
 
 
-def launch(subjects: List[Subject], face_type: str, image_size: int, jpeg_quality: int) -> None:
+def raw_launch(subjects: List[Subject], face_type: str, image_size: int, jpeg_quality: int) -> None:
     to_recover = []
     for subject in subjects:
-        if subject.is_extract_done():
+        if subject.is_raw_extract_done():
             continue
         subject.clean_alignment()
         video_to_frames(subject.original_video(), subject.original_frames())
         extract_face(subject.original_frames(), subject.aligned_frames(), face_type, image_size, jpeg_quality)
         sort_dir_by_hist(subject.aligned_frames())
-        subject.extract_done()
+        subject.raw_extract_done()
         to_recover.append(subject)
 
     if len(to_recover) == 0:
@@ -75,3 +75,20 @@ def launch(subjects: List[Subject], face_type: str, image_size: int, jpeg_qualit
 
     for subject in to_recover:
         recover_aligned_name(subject)
+
+
+def swap_launch(subjects: List[Subject], face_type: str, image_size: int, jpeg_quality: int) -> None:
+    for subject_src in subjects:
+        for subject_dst in subjects:
+            if subject_src == subject_dst:
+                continue
+            if subject_src.is_swap_extract_done_from(subject_dst.id()):
+                continue
+            extract_face(
+                subject_src.merged_frames_from(subject_dst.id()),
+                subject_src.aligned_merged_frames_from(subject_dst.id()),
+                face_type,
+                image_size,
+                jpeg_quality
+            )
+            subject_src.swap_extract_done_from(subject_dst.id())

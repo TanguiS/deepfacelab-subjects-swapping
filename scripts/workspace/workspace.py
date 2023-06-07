@@ -35,19 +35,20 @@ def videos_to_subject(input_videos_dir: Path, output_subjects_dir: Path) -> None
         next_id += 1
 
 
-def create_subject_workspace(subjects_path: Path, dim: int, quality: int) -> None:
+def create_subject_workspace(subjects_path: Path, dim: Optional[int] = None, quality: Optional[int] = None) -> None:
     subjects = load_subjects(subjects_path, dim, quality)
 
     for subject_1 in subjects:
         subject_1.original_frames().mkdir(exist_ok=True)
         subject_1.aligned_frames().mkdir(exist_ok=True)
-        subject_1.merged_frames().mkdir(exist_ok=True)
+        subject_1.merged_frames_dir().mkdir(exist_ok=True)
         subject_1.merged_videos_dir().mkdir(exist_ok=True)
         for subject_2 in subjects:
             if subject_1 == subject_2:
                 continue
             subject_1.merged_frames_from(subject_2.id()).mkdir(exist_ok=True)
             subject_1.mask_frames_from(subject_2.id()).mkdir(exist_ok=True)
+            subject_1.aligned_merged_frames_from(subject_2.id()).mkdir(exist_ok=True)
 
 
 def clean_subjects_workspace(subjects: List[Subject]) -> None:

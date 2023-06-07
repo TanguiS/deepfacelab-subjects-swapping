@@ -104,6 +104,7 @@ def launch(subjects: List[Subject], model_dir: Path, model_name: str, iteration_
     for i, subject_src in enumerate(subjects):
         for j, subject_dst in enumerate(subjects):
             if i == j or subject_src.is_merged_from_is_done(subject_dst.id()):
+                subject_src.clean_mask_from(subject_dst.id())
                 continue
             silent_start = i != 0
             swap_model(model_dir, model_name)
@@ -122,4 +123,5 @@ def launch(subjects: List[Subject], model_dir: Path, model_name: str, iteration_
 
             subject_src.merged_done_from(subject_dst.id())
             merge_mp4(subject_src, subject_dst)
+            subject_src.clean_mask_from(subject_dst.id())
     shutil.rmtree(WorkspaceStr.tmp_save.value)

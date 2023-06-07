@@ -7,7 +7,7 @@
   </component>
   <component name="PackageRequirementsSettings">
     <option name="requirementsPath" value="C:\WORK\deepfacelab-subjects-swapping\requirements.txt" />
-    <option name="versionSpecifier" value="Strong equality (==x.y.z)" />
+    <option name="versionSpecifier" value="Don't specify version" />
   </component>
   <component name="PyDocumentationSettings">
     <option name="format" value="PLAIN" />

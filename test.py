@@ -1,9 +1,9 @@
 import json
 from pathlib import Path
 
-fake = Path("path/to/subjects/subjects_x/merged_videos/videos_from_subject_y.mov")
+import pandas as pd
 
-tmp = fake.parent
-fake = str(tmp.name) + "/" + str(fake.name)
+dataset = Path('D:\storage-photos\subjects\output.pkl')
+df = pd.read_pickle(dataset)
 
-print(fake)
+a = 0

@@ -17,7 +17,9 @@ def args_parser() -> Dict[str, any]:
 
     clean_action_parser(subparsers)
 
-    extract_action_parser(subparsers)
+    raw_extract_action_parser(subparsers)
+
+    swap_extract_action_parser(subparsers)
 
     pack_action_parser(subparsers)
 
@@ -29,15 +31,25 @@ def args_parser() -> Dict[str, any]:
 
     face_swap_benchmark_action_parser(subparsers)
 
-    metadata_pack_action_parser(subparsers)
+    dataframe_action_parser(subparsers)
 
     return vars(parser.parse_args())
 
 
-def metadata_pack_action_parser(subparsers):
-    parser_metadata_pack = subparsers.add_parser("metadata_pack", help="Perform the creation of metadata.json file " +
-                                                                       "for original and merged video referencing.")
-    parser_metadata_pack.add_argument("--subjects_dir", type=Path, help="Path to the subjects directory")
+def swap_extract_action_parser(subparsers):
+    parser_extract = subparsers.add_parser("swap_extract", help="Extract faces from subjects")
+    parser_extract.add_argument("--subjects_dir", type=Path, help="Path to the subjects directory")
+    parser_extract.add_argument("--dim_output_faces", type=int, help="Dimension of the output faces")
+    parser_extract.add_argument("--png_quality", type=int, help="Quality of the extracted images")
+
+
+def dataframe_action_parser(subparsers):
+    parser_dataframe = subparsers.add_parser("metadata_pack", help="Perform the creation of metadata.json file " +
+                                                                   "for original and merged video referencing.")
+    parser_dataframe.add_argument("--subjects_dir", type=Path, help="Path to the subjects directory")
+    parser_dataframe.add_argument("--output_pickle", type=Path, default=None, help="Output path for the dataframe, " +
+                                                                                   "by default : " +
+                                                                                   " --subjects_dir/dataframe.pkl")
 
 
 def face_swap_benchmark_action_parser(subparsers):
@@ -85,7 +97,7 @@ def pack_action_parser(subparsers):
     parser_pack.add_argument("--subjects_dir", type=Path, help="Path to the subjects directory")
 
 
-def extract_action_parser(subparsers):
+def raw_extract_action_parser(subparsers):
     parser_extract = subparsers.add_parser("extract", help="Extract faces from subjects")
     parser_extract.add_argument("--subjects_dir", type=Path, help="Path to the subjects directory")
     parser_extract.add_argument("--dim_output_faces", type=int, help="Dimension of the output faces")

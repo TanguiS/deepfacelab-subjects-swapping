@@ -1,15 +1,14 @@
 from pathlib import Path
-from typing import Union
+from typing import Union, Optional
 
 import scripts.train.util
 import scripts.util
 from scripts import args_parser
-from scripts.workspace import workspace
-from scripts.train import proxy_train, face_swap
+from scripts.benchmark import face_swap_benchmark
 from scripts.extract import proxy_extract, facet_pack, facet_unpack
+from scripts.train import proxy_train, face_swap
+from scripts.workspace import workspace, dataframe
 from scripts.workspace.WorkspaceEnum import WorkspaceStr
-from scripts.benchmark import face_swap_benchmark, similarity_score_benchmark
-from scripts.workspace import metadata_pack as metapack
 
 
 def videos_to_subjects(videos_dir: Path, subjects_dir: Path) -> None:
@@ -32,10 +31,16 @@ def clean_workspace(subjects_dir: Path, redo_merged_workspace: bool) -> None:
     workspace.clean_subjects_workspace(subjects)
 
 
-def extract(subjects_dir: Path, dim_output_faces: int, png_quality: int) -> None:
+def raw_extract(subjects_dir: Path, dim_output_faces: int, png_quality: int) -> None:
     workspace.create_subject_workspace(subjects_dir, dim_output_faces, png_quality)
     subjects = workspace.load_subjects(subjects_dir, dim_output_faces, png_quality)
-    proxy_extract.launch(subjects, 'whole_face', dim_output_faces, png_quality)
+    proxy_extract.raw_launch(subjects, 'whole_face', dim_output_faces, png_quality)
+
+
+def swap_extract(subjects_dir: Path, dim_output_faces: int, png_quality: int) -> None:
+    workspace.create_subject_workspace(subjects_dir, dim_output_faces, png_quality)
+    subjects = workspace.load_subjects(subjects_dir, dim_output_faces, png_quality)
+    proxy_extract.swap_launch(subjects, 'whole_face', dim_output_faces, png_quality)
 
 
 def pack(subjects_dir: Path) -> None:
@@ -63,6 +68,7 @@ def face_swap_action(
         model_name: str,
         iteration_goal: Union[int, any] = None
 ) -> None:
+    workspace.create_subject_workspace(subjects_dir)
     subjects = workspace.load_subjects(subjects_dir)
     face_swap.launch(subjects, model_dir, model_name, iteration_goal)
 
@@ -95,10 +101,10 @@ def face_swap_bench(
     )
 
 
-def metadata_pack(subjects_dir: Path) -> None:
-    subjects = workspace.load_subjects(subjects_dir)
-    metapack.create_metadata(subjects)
-
+def dataframe_creation(subjects_dir: Path, output_pickle: Optional[Path] = None) -> None:
+    if output_pickle is None:
+        output_pickle = subjects_dir.joinpath("dataframe.pkl")
+    dataframe.create(subjects_dir, output_pickle)
 
 if __name__ == '__main__':
     import multiprocessing
@@ -115,7 +121,7 @@ if __name__ == '__main__':
         "to_subject": (videos_to_subjects, {'videos_dir', 'subjects_dir'}),
         "update_wrk": (update_workspace, {'subjects_dir'}),
         "clean": (clean_workspace, {'subjects_dir', 'redo_merged_workspace'}),
-        "extract": (extract, {'subjects_dir', 'dim_output_faces', 'png_quality'}),
+        "extract": (raw_extract, {'subjects_dir', 'dim_output_faces', 'png_quality'}),
         "pack": (pack, {'subjects_dir'}),
         "unpack": (unpack, {'subjects_dir'}),
         "pretrain": (pretrain, {'subjects_dir', 'model_dir', 'model_name', 'model_dir_backup'}),
@@ -129,7 +135,8 @@ if __name__ == '__main__':
             'iteration_goal',
             'delta_iteration'
         }),
-        "metadata_pack": (metadata_pack, {'subjects_dir'})
+        "metadata_pack": (dataframe_creation, {'subjects_dir', 'output_pickle'}),
+        "swap_extract": (swap_extract, {'subjects_dir', 'dim_output_faces', 'png_quality'})
     }
 
     action = args["action"]
