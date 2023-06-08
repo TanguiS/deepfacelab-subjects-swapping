@@ -3,7 +3,7 @@ import enum
 
 class WorkspaceStr(enum.Enum):
     frames = "frames"
-    aligned = frames + "/aligned"
+    aligned = "aligned"
     s_videos = "merged_videos"
     s_frames = "merged_frames"
     subject = "subject_"

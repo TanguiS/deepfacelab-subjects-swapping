@@ -71,10 +71,12 @@ def create(subjects_dir: Path, output_pickle_dataframe: Path) -> None:
     progress_bar.close()
 
     print("Creating DataFrame...")
-    dataframe_frame = pd.DataFrame(indexer).set_index('frame')
+    df = pd.DataFrame(indexer).set_index('frame')
 
     print(f"Saving dataframe to {output_pickle_dataframe}...")
-    dataframe_frame.to_pickle(str(output_pickle_dataframe))
+    df.to_pickle(str(output_pickle_dataframe))
+
+    print(f"Dataframe information :\n - number real frames : {sum(df['label'] == False)}\n - number fake frames : {sum(df['label'] == True)}")
 
 
 if __name__ == "__main__":

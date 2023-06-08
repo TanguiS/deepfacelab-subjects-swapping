@@ -76,7 +76,7 @@ class Subject:
         return self.merged_frames_from(subject_id).joinpath(WorkspaceStr.mask.value)
 
     def aligned_frames(self) -> Path:
-        return self.__root.joinpath(WorkspaceStr.aligned.value)
+        return self.__root.joinpath(WorkspaceStr.frames.value).joinpath(WorkspaceStr.aligned.value)
 
     def raw_extract_done(self) -> None:
         if not self.__raw_tag.exists():
@@ -102,7 +102,7 @@ class Subject:
     def clean_alignment(self) -> None:
         import shutil
 
-        aligned_dir = self.__root.joinpath(WorkspaceStr.aligned.value)
+        aligned_dir = self.aligned_frames()
         if aligned_dir.exists():
             shutil.rmtree(aligned_dir)
         aligned_dir.mkdir(exist_ok=True)
