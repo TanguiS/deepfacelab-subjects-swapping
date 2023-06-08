@@ -261,7 +261,7 @@ def launch_flexible_merge(
                 f"{WorkspaceStr.model_on_sub.value}{str(subject_src.id())}_{str(subject_dst.id())}"
             )
 
-            flexible_merge(model_dir, model_name, subject_src, subject_dst, gpu_indexes[0])
+            flexible_merge(current_model_dir, model_name, subject_src, subject_dst, gpu_indexes[0])
 
             subject_src.merged_done_from(subject_dst.id())
             merge_mp4(subject_src, subject_dst)
