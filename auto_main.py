@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Union, Optional
+from typing import Union, Optional, Dict
 
 import scripts.train.util
 import scripts.util
@@ -32,13 +32,11 @@ def clean_workspace(subjects_dir: Path, redo_merged_workspace: bool) -> None:
 
 
 def raw_extract(subjects_dir: Path, dim_output_faces: int, png_quality: int) -> None:
-    workspace.create_subject_workspace(subjects_dir, dim_output_faces, png_quality)
     subjects = workspace.load_subjects(subjects_dir, dim_output_faces, png_quality)
     proxy_extract.raw_launch(subjects, 'whole_face', dim_output_faces, png_quality)
 
 
 def swap_extract(subjects_dir: Path, dim_output_faces: int, png_quality: int) -> None:
-    workspace.create_subject_workspace(subjects_dir, dim_output_faces, png_quality)
     subjects = workspace.load_subjects(subjects_dir, dim_output_faces, png_quality)
     proxy_extract.swap_launch(subjects, 'whole_face', dim_output_faces, png_quality)
 
@@ -62,15 +60,33 @@ def pretrain(subjects_dir: Path, model_dir: Path, model_name: str, model_dir_bac
         proxy_train.save_model_copy(model_name, model_dir, model_dir_backup)
 
 
-def face_swap_action(
+def face_swap_auto_action(
         subjects_dir: Path,
         model_dir: Path,
         model_name: str,
         iteration_goal: Union[int, any] = None
 ) -> None:
-    workspace.create_subject_workspace(subjects_dir)
     subjects = workspace.load_subjects(subjects_dir)
-    face_swap.launch(subjects, model_dir, model_name, iteration_goal)
+    face_swap.launch_auto(subjects, model_dir, model_name, iteration_goal)
+
+
+def face_swap_train_flexible_action(
+        subjects_dir: Path,
+        model_dir: Path,
+        model_name: str,
+        iteration_goal: Union[int, any] = None
+) -> None:
+    subjects = workspace.load_subjects(subjects_dir)
+    face_swap.launch_flexible_train(subjects, model_dir, model_name, iteration_goal)
+
+
+def face_swap_merge_flexible_action(
+        subjects_dir: Path,
+        model_dir: Path,
+        model_name: str
+) -> None:
+    subjects = workspace.load_subjects(subjects_dir)
+    face_swap.launch_flexible_merge(subjects, model_dir, model_name)
 
 
 def face_swap_bench(
@@ -101,10 +117,18 @@ def face_swap_bench(
     )
 
 
+def workspace_setup(args: Dict[str, any]):
+    try:
+        workspace.create_subject_workspace(args['subjects_dir'], args['dim_output_faces'], args['png_quality'])
+    except KeyError:
+        workspace.create_subject_workspace(args['subjects_dir'])
+
+
 def dataframe_creation(subjects_dir: Path, output_pickle: Optional[Path] = None) -> None:
     if output_pickle is None:
         output_pickle = subjects_dir.joinpath("dataframe.pkl")
     dataframe.create(subjects_dir, output_pickle)
+
 
 if __name__ == '__main__':
     import multiprocessing
@@ -125,7 +149,11 @@ if __name__ == '__main__':
         "pack": (pack, {'subjects_dir'}),
         "unpack": (unpack, {'subjects_dir'}),
         "pretrain": (pretrain, {'subjects_dir', 'model_dir', 'model_name', 'model_dir_backup'}),
-        "swap": (face_swap_action, {'subjects_dir', 'model_dir', 'model_name', 'iteration_goal'}),
+        "swap_auto": (face_swap_auto_action, {'subjects_dir', 'model_dir', 'model_name', 'iteration_goal'}),
+        "swap_flexible_train": (face_swap_train_flexible_action, {
+            'subjects_dir', 'model_dir', 'model_name', 'iteration_goal'
+        }),
+        "swap_flexible_merge": (face_swap_merge_flexible_action, {'subjects_dir', 'model_dir', 'model_name'}),
         "face_swap_benchmark": (face_swap_bench, {
             'subjects_dir',
             'subject_src_id',
@@ -140,6 +168,7 @@ if __name__ == '__main__':
     }
 
     action = args["action"]
+    workspace_setup(args)
     try:
         action_fn, action_args = actions[action]
     except KeyError:

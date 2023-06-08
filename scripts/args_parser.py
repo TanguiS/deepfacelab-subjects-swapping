@@ -27,13 +27,34 @@ def args_parser() -> Dict[str, any]:
 
     pretrain_action_parser(subparsers)
 
-    swap_action_parser(subparsers)
+    swap_auto_action_parser(subparsers)
+
+    swap_flexible_train_action_parser(subparsers)
+
+    swap_flexible_merge_action_parser(subparsers)
 
     face_swap_benchmark_action_parser(subparsers)
 
     dataframe_action_parser(subparsers)
 
     return vars(parser.parse_args())
+
+
+def swap_flexible_merge_action_parser(subparsers):
+    parser_swap_flex_merge = subparsers.add_parser("swap_flexible_merge", help="Face swapping with flexible merger")
+    parser_swap_flex_merge.add_argument("--subjects_dir", type=Path, help="Path to the subjects directory")
+    parser_swap_flex_merge.add_argument("--model_dir", type=Path, help="Path to the models directory")
+    parser_swap_flex_merge.add_argument("--model_name", type=str, default="", help="Name of the SAEHD model")
+
+
+def swap_flexible_train_action_parser(subparsers):
+    parser_swap_flex_train = subparsers.add_parser("swap_flexible_train", help="Face swapping with flexible merger")
+    parser_swap_flex_train.add_argument("--subjects_dir", type=Path, help="Path to the subjects directory")
+    parser_swap_flex_train.add_argument("--model_dir", type=Path, help="Path to the models directory")
+    parser_swap_flex_train.add_argument("--model_name", type=str, default="", help="Name of the SAEHD model")
+    parser_swap_flex_train.add_argument("--iteration_goal", type=int, default=None, help="Iteration to reach " +
+                                                                                         " for each face swapping " +
+                                                                                         "operation")
 
 
 def swap_extract_action_parser(subparsers):
@@ -69,14 +90,14 @@ def face_swap_benchmark_action_parser(subparsers):
                                                                       "benchmarking.")
 
 
-def swap_action_parser(subparsers):
-    parser_swap = subparsers.add_parser("swap", help="Face swapping")
-    parser_swap.add_argument("--subjects_dir", type=Path, help="Path to the subjects directory")
-    parser_swap.add_argument("--model_dir", type=Path, help="Path to the models directory")
-    parser_swap.add_argument("--model_name", type=str, default="", help="Name of the SAEHD model")
-    parser_swap.add_argument("--iteration_goal", type=int, default=None, help="Iteration to reach " +
-                                                                              " for each face swapping " +
-                                                                              "operation")
+def swap_auto_action_parser(subparsers):
+    parser_swap_auto = subparsers.add_parser("swap_auto", help="Face swapping")
+    parser_swap_auto.add_argument("--subjects_dir", type=Path, help="Path to the subjects directory")
+    parser_swap_auto.add_argument("--model_dir", type=Path, help="Path to the models directory")
+    parser_swap_auto.add_argument("--model_name", type=str, default="", help="Name of the SAEHD model")
+    parser_swap_auto.add_argument("--iteration_goal", type=int, default=None, help="Iteration to reach " +
+                                                                                   " for each face swapping " +
+                                                                                   "operation")
 
 
 def pretrain_action_parser(subparsers):

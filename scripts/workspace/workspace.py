@@ -1,6 +1,6 @@
 import shutil
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from tqdm import tqdm
 
@@ -37,6 +37,10 @@ def videos_to_subject(input_videos_dir: Path, output_subjects_dir: Path) -> None
 
 def create_subject_workspace(subjects_path: Path, dim: Optional[int] = None, quality: Optional[int] = None) -> None:
     subjects = load_subjects(subjects_path, dim, quality)
+    data_augmentation_rd = subjects_path.joinpath(WorkspaceStr.augmentation.value)
+    data_augmentation_rd.mkdir(exist_ok=True)
+    data_augmentation_rd.joinpath(WorkspaceStr.r_aug.value).mkdir(exist_ok=True)
+    data_augmentation_rd.joinpath(WorkspaceStr.f_aug.value).mkdir(exist_ok=True)
 
     for subject_1 in subjects:
         subject_1.original_frames().mkdir(exist_ok=True)
@@ -49,6 +53,13 @@ def create_subject_workspace(subjects_path: Path, dim: Optional[int] = None, qua
             subject_1.merged_frames_from(subject_2.id()).mkdir(exist_ok=True)
             subject_1.mask_frames_from(subject_2.id()).mkdir(exist_ok=True)
             subject_1.aligned_merged_frames_from(subject_2.id()).mkdir(exist_ok=True)
+
+
+def random_data_augmentation_tree(subjects_path: Path) -> Tuple[Path, Path, Path]:
+    data_augmentation_rd = subjects_path.joinpath(WorkspaceStr.augmentation.value)
+    fake_data = data_augmentation_rd.joinpath(WorkspaceStr.f_aug.value)
+    real_data = data_augmentation_rd.joinpath(WorkspaceStr.r_aug.value)
+    return data_augmentation_rd, fake_data, real_data
 
 
 def clean_subjects_workspace(subjects: List[Subject]) -> None:
@@ -103,3 +114,19 @@ def benchmark_workspace(benchmark_dir: Path, models_name: List[str], max_iterati
         model_dir.joinpath(WorkspaceStr.tmp_save.value).mkdir()
         for iteration_goal in range(delta_iteration, max_iteration + 1, delta_iteration):
             model_dir.joinpath(str(iteration_goal)).mkdir()
+
+
+def create_flexible_train_merge_workspace(models_dir: Path, subjects: List[Subject]) -> None:
+    save_model_dir = models_dir.joinpath(WorkspaceStr.flex_model.value)
+    save_model_dir.mkdir(exist_ok=True)
+
+    for subject_src in subjects:
+        for subject_dst in subjects:
+            if subject_src == subject_dst:
+                continue
+            save_model_dir.joinpath(f"{WorkspaceStr.model_on_sub.value}{str(subject_src.id())}_{str(subject_src.id())}")
+
+
+def clean_flexible_train_merge_workspace(models_dir: Path) -> None:
+    shutil.rmtree(models_dir.joinpath(WorkspaceStr.flex_model.value))
+
