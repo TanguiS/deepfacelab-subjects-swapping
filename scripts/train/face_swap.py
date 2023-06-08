@@ -204,6 +204,45 @@ def launch_flexible_train(
     shutil.rmtree(WorkspaceStr.tmp_save.value)
 
 
+model_class_name = 'SAEHD',
+saved_models_path = model_dir,
+force_model_name = model_name or None,
+input_path = input_path,
+output_path = output_path,
+output_mask_path = output_mask_path,
+aligned_path = aligned_path,
+force_gpu_idxs = gpu_indexes,
+cpu_only = None
+
+
+def flexible_merge(model_dir: Path, model_name: str, subject_src: Subject, subject_dst: Subject, gpu_index: int) -> None:
+    command = [
+        "python", "main.py", "merge",
+        "--model_class_name", 'SAEHD',
+        "--saved_models_path", str(model_dir),
+        "--force_model_name", model_name,
+        "--input_path", str(subject_dst.original_frames()),
+        "--output_path", str(subject_src.merged_frames_from(subject_dst.id())),
+        "--output_mask_path", str(subject_src.mask_frames_from(subject_dst.id())),
+        "--aligned_path",  str(subject_dst.aligned_frames()),
+        "--forge_gpu_indexes", str(gpu_index)
+    ]
+    command_str = " ".join(command)
+    print(command_str)
+    while True:
+        subprocess.Popen(
+            f"gnome-terminal -- bash -ic 'conda activate deepfacelab; {command_str}; exec $SHELL'",
+            shell=True
+        )
+        print("Press [Enter] when merge is done or [r] to retry and run merger again...")
+        user_input = input().lower()
+        if user_input == 'r':
+            continue
+        else:
+            break
+    print("Continuing...")
+
+
 def launch_flexible_merge(
         subjects: List[Subject],
         model_dir: Path,
@@ -222,11 +261,7 @@ def launch_flexible_merge(
                 f"{WorkspaceStr.model_on_sub.value}{str(subject_src.id())}_{str(subject_dst.id())}"
             )
 
-            process = multiprocessing.Process(target=merge, args=(
-                subject_src, subject_dst, current_model_dir, model_name, gpu_indexes
-            ))
-            process.start()
-            process.join()
+            flexible_merge(model_dir, model_name, subject_src, subject_dst, gpu_indexes[0])
 
             subject_src.merged_done_from(subject_dst.id())
             merge_mp4(subject_src, subject_dst)
