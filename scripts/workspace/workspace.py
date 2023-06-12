@@ -125,8 +125,8 @@ def create_flexible_train_merge_workspace(models_dir: Path, subjects: List[Subje
             if subject_src == subject_dst:
                 continue
             save_model_dir.joinpath(f"{WorkspaceStr.model_on_sub.value}{str(subject_src.id())}_{str(subject_src.id())}")
+            save_model_dir.mkdir(exist_ok=True)
 
 
 def clean_flexible_train_merge_workspace(models_dir: Path) -> None:
     shutil.rmtree(models_dir.joinpath(WorkspaceStr.flex_model.value))
-

@@ -89,6 +89,10 @@ def face_swap_merge_flexible_action(
     face_swap.launch_flexible_merge(subjects, model_dir, model_name)
 
 
+def clean_flexible_train(subjects_dir: Path) -> None:
+    workspace.clean_flexible_train_merge_workspace(subjects_dir)
+
+
 def face_swap_bench(
         subjects_dir: Path,
         subject_src_id: int,
@@ -154,6 +158,7 @@ if __name__ == '__main__':
             'subjects_dir', 'model_dir', 'model_name', 'iteration_goal'
         }),
         "swap_flexible_merge": (face_swap_merge_flexible_action, {'subjects_dir', 'model_dir', 'model_name'}),
+        "clea_flexible_train": (clean_flexible_train, {'model_dir'}),
         "face_swap_benchmark": (face_swap_bench, {
             'subjects_dir',
             'subject_src_id',

@@ -33,11 +33,18 @@ def args_parser() -> Dict[str, any]:
 
     swap_flexible_merge_action_parser(subparsers)
 
+    clean_flexible_train_action_parser(subparsers)
+
     face_swap_benchmark_action_parser(subparsers)
 
     dataframe_action_parser(subparsers)
 
     return vars(parser.parse_args())
+
+
+def clean_flexible_train_action_parser(subparsers):
+    parser_clean_flex_train = subparsers.add_parser("clean_flexible_train", help="Clean all trained models.")
+    parser_clean_flex_train.add_argument("--model_dir", type=Path, help="Path to the models directory")
 
 
 def swap_flexible_merge_action_parser(subparsers):

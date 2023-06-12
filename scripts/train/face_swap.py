@@ -132,7 +132,9 @@ def launch_auto(
             subject_src.merged_done_from(subject_dst.id())
             merge_mp4(subject_src, subject_dst)
             subject_src.clean_mask_from(subject_dst.id())
-    shutil.rmtree(WorkspaceStr.tmp_save.value)
+
+    to_delete = model_dir.joinpath(WorkspaceStr.tmp_save.value)
+    shutil.rmtree(to_delete)
 
 
 def save_model(model_dir: Path, model_name: str, subject_src_id: int, subject_dst_id: int) -> None:
@@ -166,7 +168,7 @@ def is_model_on_src_dst_is_done(model_dir: Path, subject_src_id: int, subject_ds
     return tag.exists()
 
 
-def model_on_src_dst_is_done(model_dir: Path, subject_src_id: int, subject_dst_id: int) -> bool:
+def model_on_src_dst_is_done(model_dir: Path, subject_src_id: int, subject_dst_id: int) -> None:
     tag = model_dir.joinpath(WorkspaceStr.flex_model.value
                              ).joinpath(
         f"{WorkspaceStr.model_on_sub.value}{str(subject_src_id)}_{str(subject_dst_id)}"
@@ -201,18 +203,8 @@ def launch_flexible_train(
             process.start()
             process.join()
 
-    shutil.rmtree(WorkspaceStr.tmp_save.value)
-
-
-model_class_name = 'SAEHD',
-saved_models_path = model_dir,
-force_model_name = model_name or None,
-input_path = input_path,
-output_path = output_path,
-output_mask_path = output_mask_path,
-aligned_path = aligned_path,
-force_gpu_idxs = gpu_indexes,
-cpu_only = None
+    to_delete = model_dir.joinpath(WorkspaceStr.tmp_save.value)
+    shutil.rmtree(to_delete)
 
 
 def flexible_merge(model_dir: Path, model_name: str, subject_src: Subject, subject_dst: Subject, gpu_index: int) -> None:
