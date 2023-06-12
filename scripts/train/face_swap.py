@@ -46,6 +46,8 @@ def setup(model_dir: Path, model_name: str, gpu_indexes: Union[list, List[int]],
             break
     print("Continuing...")
 
+
+def setup_temporary_model(model_dir, model_name):
     files = [file for file in model_dir.glob(f"{model_name}*")]
     save_dir = model_dir.joinpath(WorkspaceStr.tmp_save.value)
     if save_dir.exists():
@@ -108,6 +110,7 @@ def launch_auto(
 
     if iteration_goal is None:
         setup(model_dir, model_name, gpu_indexes, subjects[0])
+    setup_temporary_model(model_dir, model_name)
 
     for i, subject_src in enumerate(subjects):
         for j, subject_dst in enumerate(subjects):
@@ -137,7 +140,7 @@ def launch_auto(
     shutil.rmtree(to_delete)
 
 
-def save_model(model_dir: Path, model_name: str, subject_src_id: int, subject_dst_id: int) -> None:
+def save_model(model_dir: Path, model_name: str, subject_src_id: int, subject_dst_id: int) -> Path:
     files = [file for file in model_dir.glob(f"{model_name}*")]
     dst_dir = model_dir.joinpath(
         WorkspaceStr.flex_model.value
@@ -147,6 +150,7 @@ def save_model(model_dir: Path, model_name: str, subject_src_id: int, subject_ds
         if file.is_dir():
             continue
         shutil.copy(file, dst_dir)
+    return dst_dir
 
 
 def is_model_on_src_dst_in_retrain_mode(model_dir: Path, subject_src_id: int, subject_dst_id: int) -> bool:
@@ -194,11 +198,10 @@ def launch_flexible_train(
             if i == j or is_model_on_src_dst_is_done(model_dir, subject_src.id(), subject_dst.id()):
                 continue
             silent_start = i != 0
-            save_model(model_dir, model_name, subject_src.id(), subject_dst.id())
-            move_model(model_dir, model_name)
+            model_on_subject = save_model(model_dir, model_name, subject_src.id(), subject_dst.id())
 
             process = multiprocessing.Process(target=face_swap_train, args=(
-                subject_src, subject_dst, model_dir, model_name, gpu_indexes, silent_start, iteration_goal
+                subject_src, subject_dst, model_on_subject, model_name, gpu_indexes, silent_start, iteration_goal
             ))
             process.start()
             process.join()
