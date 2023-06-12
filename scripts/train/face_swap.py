@@ -210,14 +210,14 @@ def launch_flexible_train(
 def flexible_merge(model_dir: Path, model_name: str, subject_src: Subject, subject_dst: Subject, gpu_index: int) -> None:
     command = [
         "python", "main.py", "merge",
-        "--model-class-name", 'SAEHD',
-        "--saved-models-path", str(model_dir),
+        "--model", 'SAEHD',
+        "--model-dir", str(model_dir),
         "--force-model-name", model_name,
-        "--input-path", str(subject_dst.original_frames()),
-        "--output-path", str(subject_src.merged_frames_from(subject_dst.id())),
-        "--output-mask-path", str(subject_src.mask_frames_from(subject_dst.id())),
-        "--aligned-path",  str(subject_dst.aligned_frames()),
-        "--forge-gpu-indexes", str(gpu_index)
+        "--input-dir", str(subject_dst.original_frames()),
+        "--output-dir", str(subject_src.merged_frames_from(subject_dst.id())),
+        "--output-mask-dir", str(subject_src.mask_frames_from(subject_dst.id())),
+        "--aligned-dir",  str(subject_dst.aligned_frames()),
+        "--forge-gpu-idxs", str(gpu_index)
     ]
     command_str = " ".join(command)
     print(command_str)
