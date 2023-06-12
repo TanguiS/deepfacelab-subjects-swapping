@@ -207,7 +207,7 @@ def launch_flexible_train(
             process.join()
 
 
-def flexible_merge(model_dir: Path, model_name: str, subject_src: Subject, subject_dst: Subject, gpu_index: int) -> None:
+def flexible_merge(model_dir: Path, model_name: str, subject_src: Subject, subject_dst: Subject) -> None:
     command = [
         "python", "main.py", "merge",
         "--model", 'SAEHD',
@@ -216,8 +216,7 @@ def flexible_merge(model_dir: Path, model_name: str, subject_src: Subject, subje
         "--input-dir", str(subject_dst.original_frames()),
         "--output-dir", str(subject_src.merged_frames_from(subject_dst.id())),
         "--output-mask-dir", str(subject_src.mask_frames_from(subject_dst.id())),
-        "--aligned-dir",  str(subject_dst.aligned_frames()),
-        "--forge-gpu-idxs", str(gpu_index)
+        "--aligned-dir",  str(subject_dst.aligned_frames())
     ]
     command_str = " ".join(command)
     print(command_str)
@@ -241,7 +240,6 @@ def launch_flexible_merge(
         model_name: str
 ) -> None:
     model_name = util.choose_model(model_dir, model_name)
-    gpu_indexes = util.choose_gpu_index()
 
     for i, subject_src in enumerate(subjects):
         for j, subject_dst in enumerate(subjects):
@@ -254,7 +252,7 @@ def launch_flexible_merge(
                 f"{WorkspaceStr.model_on_sub.value}{str(subject_src.id())}_{str(subject_dst.id())}"
             )
 
-            flexible_merge(current_model_dir, model_name, subject_src, subject_dst, gpu_indexes[0])
+            flexible_merge(current_model_dir, model_name, subject_src, subject_dst)
 
             subject_src.merged_done_from(subject_dst.id())
             merge_mp4(subject_src, subject_dst)
