@@ -146,7 +146,7 @@ def save_model(model_dir: Path, model_name: str, subject_src_id: int, subject_ds
         WorkspaceStr.flex_model.value
     ).joinpath(f"{WorkspaceStr.model_on_sub.value}{str(subject_src_id)}_{str(subject_dst_id)}")
 
-    for file in tqdm(files, total=len(files), miniters=1, desc="saving model"):
+    for file in tqdm(files, total=len(files), miniters=1, desc=f"Saving model from {model_dir} to {dst_dir}"):
         if file.is_dir():
             continue
         shutil.copy(file, dst_dir)
@@ -206,21 +206,18 @@ def launch_flexible_train(
             process.start()
             process.join()
 
-    to_delete = model_dir.joinpath(WorkspaceStr.tmp_save.value)
-    shutil.rmtree(to_delete)
-
 
 def flexible_merge(model_dir: Path, model_name: str, subject_src: Subject, subject_dst: Subject, gpu_index: int) -> None:
     command = [
         "python", "main.py", "merge",
-        "--model_class_name", 'SAEHD',
-        "--saved_models_path", str(model_dir),
-        "--force_model_name", model_name,
-        "--input_path", str(subject_dst.original_frames()),
-        "--output_path", str(subject_src.merged_frames_from(subject_dst.id())),
-        "--output_mask_path", str(subject_src.mask_frames_from(subject_dst.id())),
-        "--aligned_path",  str(subject_dst.aligned_frames()),
-        "--forge_gpu_indexes", str(gpu_index)
+        "--model-class-name", 'SAEHD',
+        "--saved-models-path", str(model_dir),
+        "--force-model-name", model_name,
+        "--input-path", str(subject_dst.original_frames()),
+        "--output-path", str(subject_src.merged_frames_from(subject_dst.id())),
+        "--output-mask-path", str(subject_src.mask_frames_from(subject_dst.id())),
+        "--aligned-path",  str(subject_dst.aligned_frames()),
+        "--forge-gpu-indexes", str(gpu_index)
     ]
     command_str = " ".join(command)
     print(command_str)
