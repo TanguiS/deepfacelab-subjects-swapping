@@ -86,7 +86,7 @@ def swap_launch(subjects: List[Subject], face_type: str, image_size: int, jpeg_q
                 continue
             extract_face(
                 subject_src.merged_frames_from(subject_dst.id()),
-                subject_src.aligned_merged_frames_from(subject_dst.id()),
+                subject_src.face_merged_frames_from(subject_dst.id()),
                 face_type,
                 image_size,
                 jpeg_quality

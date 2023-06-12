@@ -251,8 +251,9 @@ def launch_flexible_merge(
             if i == j or subject_src.is_merged_from_is_done(subject_dst.id()):
                 subject_src.clean_mask_from(subject_dst.id())
                 continue
-            current_model_dir = model_dir.joinpath(WorkspaceStr.flex_model.value
-                                                   ).joinpath(
+            current_model_dir = model_dir.joinpath(
+                WorkspaceStr.flex_model.value
+            ).joinpath(
                 f"{WorkspaceStr.model_on_sub.value}{str(subject_src.id())}_{str(subject_dst.id())}"
             )
 

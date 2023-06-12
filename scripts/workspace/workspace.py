@@ -47,12 +47,13 @@ def create_subject_workspace(subjects_path: Path, dim: Optional[int] = None, qua
         subject_1.aligned_frames().mkdir(exist_ok=True)
         subject_1.merged_frames_dir().mkdir(exist_ok=True)
         subject_1.merged_videos_dir().mkdir(exist_ok=True)
+        subject_1.face_frames().mkdir(exist_ok=True)
         for subject_2 in subjects:
             if subject_1 == subject_2:
                 continue
             subject_1.merged_frames_from(subject_2.id()).mkdir(exist_ok=True)
             subject_1.mask_frames_from(subject_2.id()).mkdir(exist_ok=True)
-            subject_1.aligned_merged_frames_from(subject_2.id()).mkdir(exist_ok=True)
+            subject_1.face_merged_frames_from(subject_2.id()).mkdir(exist_ok=True)
 
 
 def random_data_augmentation_tree(subjects_path: Path) -> Tuple[Path, Path, Path]:
@@ -125,7 +126,7 @@ def create_flexible_train_merge_workspace(models_dir: Path, subjects: List[Subje
             if subject_src == subject_dst:
                 continue
             on_each_subjects = save_model_dir.joinpath(
-                f"{WorkspaceStr.model_on_sub.value}{str(subject_src.id())}_{str(subject_src.id())}"
+                f"{WorkspaceStr.model_on_sub.value}{str(subject_src.id())}_{str(subject_dst.id())}"
             )
             on_each_subjects.mkdir(exist_ok=True)
 

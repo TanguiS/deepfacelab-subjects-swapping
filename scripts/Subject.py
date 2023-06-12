@@ -69,14 +69,17 @@ class Subject:
     def merged_frames_from(self, subject_id: int) -> Path:
         return self.merged_frames_dir().joinpath(WorkspaceStr.dst_video.value + str(subject_id))
 
-    def aligned_merged_frames_from(self, subject_id: int) -> Path:
-        return self.merged_frames_from(subject_id).joinpath(WorkspaceStr.aligned.value)
+    def face_merged_frames_from(self, subject_id: int) -> Path:
+        return self.merged_frames_from(subject_id).joinpath(WorkspaceStr.face.value)
 
     def mask_frames_from(self, subject_id: int):
         return self.merged_frames_from(subject_id).joinpath(WorkspaceStr.mask.value)
 
     def aligned_frames(self) -> Path:
         return self.__root.joinpath(WorkspaceStr.frames.value).joinpath(WorkspaceStr.aligned.value)
+
+    def face_frames(self) -> Path:
+        return self.__root.joinpath(WorkspaceStr.frames.value).joinpath(WorkspaceStr.face.value)
 
     def raw_extract_done(self) -> None:
         if not self.__raw_tag.exists():
