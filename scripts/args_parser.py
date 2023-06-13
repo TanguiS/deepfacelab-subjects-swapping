@@ -39,7 +39,22 @@ def args_parser() -> Dict[str, any]:
 
     dataframe_action_parser(subparsers)
 
+    extract_face_from_subject_action_parser(subparsers)
+
     return vars(parser.parse_args())
+
+
+def extract_face_from_subject_action_parser(subparsers):
+    parser_extract_face = subparsers.add_parser("extract_face_from_subject", help="Extract faces from merged" +
+                                                                                  " and original frames folder" +
+                                                                                  " for every subject")
+    parser_extract_face.add_argument("--subjects_dir", type=Path, help="Path to the subjects directory")
+    parser_extract_face.add_argument("--model_dir", type=Path, help="Path to the onxx models directory for YuNet class")
+    parser_extract_face.add_argument("--input_shape", type=int,
+                                     help="Square shape of the input YuNet class for face extraction")
+    parser_extract_face.add_argument("--max_shape", type=int,
+                                     help="Shape of the output faces, should be less than shape")
+
 
 
 def clean_flexible_train_action_parser(subparsers):
@@ -142,6 +157,7 @@ def clean_action_parser(subparsers):
     parser_clean.add_argument("--subjects_dir", type=Path, help="Path to the subjects directory")
     parser_clean.add_argument("--redo_merged", action='store_true', help="Clean only the merged folder")
     parser_clean.add_argument("--redo_original", action='store_true', help="Clean only the frames and alignment folder")
+    parser_clean.add_argument("--redo_face", action='store_true', help="Clean only the frames face folder")
 
 
 def to_subject_action_parser(subparsers):

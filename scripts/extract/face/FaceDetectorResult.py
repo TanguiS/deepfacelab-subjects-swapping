@@ -12,9 +12,8 @@ from scripts.extract.face.yunet import YuNet
 def load_face_detection_model(
         model_dir: Path,
         model_file_name: str = 'face_detection_yunet_2022mar.onnx',
-        input_size: Optional[Tuple[int ,int]] = (300, 300)
+        input_size: Optional[Tuple[int, int]] = (300, 300)
 ) -> YuNet:
-
     face_detector = YuNet(
         model_path=str(model_dir.joinpath(model_file_name)),
         input_size=input_size,

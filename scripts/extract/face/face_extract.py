@@ -42,15 +42,18 @@ def is_valid_frame(frame: Path) -> bool:
 
 
 def are_subjects_extractable(subject_src: Subject, subject_dst: Subject, max_shape: int) -> bool:
-    return subject_src != subject_dst and not subject_src.frame.face.is_extracting_done_from(subject_dst.id(), max_shape)
+    return subject_src != subject_dst and not subject_src.frame.face.is_extracting_done_from(subject_dst.id(),
+                                                                                             max_shape)
+
+
+def is_subject_extractable(subject_src: Subject, max_shape: int) -> bool:
+    return subject_src.frame.face.is_extracting_done(max_shape)
 
 
 def extract_face_from_list(
         face_detector_model: YuNet,
         max_shape: int,
         merged_frames: List[Path],
-        progress: float,
-        progress_bar: tqdm,
         output_dir: Path
 ) -> None:
     for frame in merged_frames:
@@ -60,7 +63,6 @@ def extract_face_from_list(
             output_dir,
             f"{max_shape}_{frame.name}"
         )
-        progress_bar.update(math.floor(progress * 100) / 100)
 
 
 def extract_face_from_subject(subjects: List[Subject], face_detector_model: YuNet, max_shape: int = 112):
@@ -70,29 +72,37 @@ def extract_face_from_subject(subjects: List[Subject], face_detector_model: YuNe
     for subject_src in subjects:
         for subject_dst in subjects:
             if not are_subjects_extractable(subject_src, subject_dst, max_shape):
+                if subject_src == subject_dst:
+                    continue
+                progress_bar.update(1)
                 continue
+
             merged_frames = [
-                frame for frame in subject_src.frame.merged.frames_dir_from(subject_dst.id()).iterdir() if is_valid_frame(frame)
+                frame for frame in subject_src.frame.merged.frames_dir_from(subject_dst.id()).iterdir() if
+                is_valid_frame(frame)
             ]
-            progress = max_progress_per_subject / len(merged_frames)
-            extract_face_from_list(face_detector_model, max_shape, merged_frames, progress, progress_bar,
+            extract_face_from_list(face_detector_model, max_shape, merged_frames,
                                    subject_src.frame.face.frames_dir_from(subject_dst.id()))
             subject_src.frame.face.extracting_done_from(subject_dst.id(), max_shape)
+            progress_bar.update(1)
+
+        if not is_subject_extractable(subject_src, max_shape):
+            progress_bar.update(1)
+            continue
+
         original_frames = [
             frame for frame in subject_src.frame.original.frames_dir().iterdir() if is_valid_frame(frame)
         ]
-        progress = max_progress_per_subject / len(original_frames)
-        extract_face_from_list(face_detector_model, max_shape, original_frames, progress, progress_bar,
-                               subject_src.frame.face.frames_dir())
+        extract_face_from_list(face_detector_model, max_shape, original_frames, subject_src.frame.face.frames_dir())
         subject_src.frame.face.extracting_done(max_shape)
-        progress_bar.update(max_progress_per_subject - progress_bar.n)
+        progress_bar.update(1)
 
 
 if __name__ == '__main__':
     model_dir = Path('C:\\WORK\\model')
-    model_feature_extraction = load_model(model_dir)
-    shape = (1024, 1024)
+    # model_feature_extraction = load_model(model_dir)
+    shape = (720, 720)
     face_detector = load_face_detection_model(model_dir, input_size=shape)
     str_reference_image_path = "D:\\storage-photos\\benchmark\\reference_face.png"
     str_probe_image_path = "D:\\storage-photos\\benchmark\\p384dfudt\\1900\\00042.png"
-    extract_face(Path(str_probe_image_path), face_detector, max_shape=720)
+    extract_face(Path(str_probe_image_path), face_detector, max_shape=384)

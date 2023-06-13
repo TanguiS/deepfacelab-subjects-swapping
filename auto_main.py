@@ -7,6 +7,7 @@ from scripts import args_parser
 from scripts.benchmark import face_swap_benchmark
 from scripts.extract import facet_pack, facet_unpack
 from scripts.extract.aligned import proxy_extract
+from scripts.extract.face import face_extract
 from scripts.train import proxy_train, face_swap
 from scripts.workspace import workspace, dataframe
 from scripts.workspace.WorkspaceEnum import WorkspaceStr
@@ -21,7 +22,7 @@ def update_workspace(subjects_dir: Path):
     workspace.update_subjects(subjects)
 
 
-def clean_workspace(subjects_dir: Path, redo_merged: bool, redo_alignment: bool) -> None:
+def clean_workspace(subjects_dir: Path, redo_merged: bool, redo_original: bool, redo_face: bool) -> None:
     subjects = workspace.load_subjects(subjects_dir)
     if redo_merged:
         for subject in subjects:
@@ -29,25 +30,25 @@ def clean_workspace(subjects_dir: Path, redo_merged: bool, redo_alignment: bool)
         dim, quality = subjects[0].specs()
         workspace.create_subject_workspace(subjects_dir, dim, quality)
         return
-    if redo_alignment:
+    if redo_original:
         for subject in subjects:
             subject.clean.clean_alignment()
-            dim, quality = subjects[0].specs()
-            workspace.create_subject_workspace(subjects_dir, dim, quality)
+        dim, quality = subjects[0].specs()
+        workspace.create_subject_workspace(subjects_dir, dim, quality)
+        return
+    if redo_face:
+        for subject in subjects:
+            subject.clean.clean_face()
+        dim, quality = subjects[0].specs()
+        workspace.create_subject_workspace(subjects_dir, dim, quality)
+        return
     for subject in subjects:
         subject.clean.clean_all()
 
 
 def raw_extract(subjects_dir: Path, dim_output_faces: int, png_quality: int) -> None:
     subjects = workspace.load_subjects(subjects_dir, dim_output_faces, png_quality)
-    proxy_extract.raw_launch(subjects, 'whole_face', dim_output_faces, png_quality)
-
-
-"""
-def swap_extract(subjects_dir: Path, dim_output_faces: int, png_quality: int) -> None:
-    subjects = workspace.load_subjects(subjects_dir, dim_output_faces, png_quality)
-    proxy_extract.swap_launch(subjects, 'whole_face', dim_output_faces, png_quality)
-"""
+    proxy_extract.launch(subjects, 'whole_face', dim_output_faces, png_quality)
 
 
 def pack(subjects_dir: Path) -> None:
@@ -143,6 +144,16 @@ def dataframe_creation(subjects_dir: Path, output_pickle: Optional[Path] = None)
     dataframe.create(subjects_dir, output_pickle)
 
 
+def extract_face_from_subject(subjects_dir: Path, model_dir: Path, input_shape: int, max_shape: int) -> None:
+    from scripts.extract.face.FaceDetectorResult import load_face_detection_model
+
+    shape = (input_shape, input_shape)
+    subjects = workspace.load_subjects(subjects_dir)
+    face_detector = load_face_detection_model(model_dir, input_size=shape)
+    face_extract.extract_face_from_subject(subjects, face_detector, max_shape)
+
+
+
 if __name__ == '__main__':
     import multiprocessing
 
@@ -157,7 +168,7 @@ if __name__ == '__main__':
     actions = {
         "to_subject": (videos_to_subjects, {'videos_dir', 'subjects_dir'}),
         "update_wrk": (update_workspace, {'subjects_dir'}),
-        "clean": (clean_workspace, {'subjects_dir', 'redo_merged', 'redo_alignment'}),
+        "clean": (clean_workspace, {'subjects_dir', 'redo_merged', 'redo_original', 'redo_face'}),
         "extract": (raw_extract, {'subjects_dir', 'dim_output_faces', 'png_quality'}),
         "pack": (pack, {'subjects_dir'}),
         "unpack": (unpack, {'subjects_dir'}),
@@ -177,8 +188,13 @@ if __name__ == '__main__':
             'iteration_goal',
             'delta_iteration'
         }),
-        "metadata_pack": (dataframe_creation, {'subjects_dir', 'output_pickle'})
-        # "swap_extract": (swap_extract, {'subjects_dir', 'dim_output_faces', 'png_quality'})
+        "metadata_pack": (dataframe_creation, {'subjects_dir', 'output_pickle'}),
+        "extract_face_from_subject": (extract_face_from_subject, {
+            'subjects_dir',
+            'model_dir',
+            'input_shape',
+            'max_shape'
+        })
     }
 
     action = args["action"]

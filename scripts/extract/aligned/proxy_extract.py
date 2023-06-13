@@ -54,7 +54,7 @@ def recover_aligned_name(subject: Subject):
     Util.recover_original_aligned_filename(subject.frame.original.aligned_dir())
 
 
-def raw_launch(subjects: List[Subject], face_type: str, image_size: int, jpeg_quality: int) -> None:
+def launch(subjects: List[Subject], face_type: str, image_size: int, jpeg_quality: int) -> None:
     to_recover = []
     for subject in subjects:
         if subject.frame.original.is_align_extract_done():

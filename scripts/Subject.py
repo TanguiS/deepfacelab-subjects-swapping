@@ -213,6 +213,18 @@ class Clean:
         if self.__subject.video.merged_videos_dir().exists():
             shutil.rmtree(self.__subject.video.merged_videos_dir())
 
+    def clean_face(self) -> None:
+        import shutil
+
+        faces = [
+            face_folder.joinpath(WorkspaceStr.face.value)
+            for face_folder in self.__subject.frame.merged.frames_dir().iterdir()
+        ]
+        faces.append(self.__subject.frame.face.frames_dir())
+
+        for face in faces:
+            shutil.rmtree(face)
+
     def clean_all(self):
         import shutil
 
