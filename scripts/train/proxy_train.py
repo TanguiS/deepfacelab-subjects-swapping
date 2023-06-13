@@ -37,8 +37,8 @@ def launch(
     kwargs = {
         'model_class_name': 'SAEHD',
         'saved_models_path': model_dir,
-        'training_data_src_path': subject_src.aligned_frames(),
-        'training_data_dst_path': subject_dst.aligned_frames(),
+        'training_data_src_path': subject_src.frame.original.aligned_dir(),
+        'training_data_dst_path': subject_dst.frame.original.aligned_dir(),
         'pretraining_data_path': subject_src.root_dir().parent.joinpath(WorkspaceStr.pretrain.value),
         'pretrained_model_path': None,
         'no_preview': False,

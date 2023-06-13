@@ -5,7 +5,8 @@ import scripts.train.util
 import scripts.util
 from scripts import args_parser
 from scripts.benchmark import face_swap_benchmark
-from scripts.extract import proxy_extract, facet_pack, facet_unpack
+from scripts.extract import facet_pack, facet_unpack
+from scripts.extract.aligned import proxy_extract
 from scripts.train import proxy_train, face_swap
 from scripts.workspace import workspace, dataframe
 from scripts.workspace.WorkspaceEnum import WorkspaceStr
@@ -20,15 +21,21 @@ def update_workspace(subjects_dir: Path):
     workspace.update_subjects(subjects)
 
 
-def clean_workspace(subjects_dir: Path, redo_merged_workspace: bool) -> None:
+def clean_workspace(subjects_dir: Path, redo_merged: bool, redo_alignment: bool) -> None:
     subjects = workspace.load_subjects(subjects_dir)
-    if redo_merged_workspace:
+    if redo_merged:
         for subject in subjects:
-            subject.clean_workspace()
+            subject.clean.clean_merged()
         dim, quality = subjects[0].specs()
         workspace.create_subject_workspace(subjects_dir, dim, quality)
         return
-    workspace.clean_subjects_workspace(subjects)
+    if redo_alignment:
+        for subject in subjects:
+            subject.clean.clean_alignment()
+            dim, quality = subjects[0].specs()
+            workspace.create_subject_workspace(subjects_dir, dim, quality)
+    for subject in subjects:
+        subject.clean.clean_all()
 
 
 def raw_extract(subjects_dir: Path, dim_output_faces: int, png_quality: int) -> None:
@@ -36,9 +43,11 @@ def raw_extract(subjects_dir: Path, dim_output_faces: int, png_quality: int) -> 
     proxy_extract.raw_launch(subjects, 'whole_face', dim_output_faces, png_quality)
 
 
+"""
 def swap_extract(subjects_dir: Path, dim_output_faces: int, png_quality: int) -> None:
     subjects = workspace.load_subjects(subjects_dir, dim_output_faces, png_quality)
     proxy_extract.swap_launch(subjects, 'whole_face', dim_output_faces, png_quality)
+"""
 
 
 def pack(subjects_dir: Path) -> None:
@@ -148,7 +157,7 @@ if __name__ == '__main__':
     actions = {
         "to_subject": (videos_to_subjects, {'videos_dir', 'subjects_dir'}),
         "update_wrk": (update_workspace, {'subjects_dir'}),
-        "clean": (clean_workspace, {'subjects_dir', 'redo_merged_workspace'}),
+        "clean": (clean_workspace, {'subjects_dir', 'redo_merged', 'redo_alignment'}),
         "extract": (raw_extract, {'subjects_dir', 'dim_output_faces', 'png_quality'}),
         "pack": (pack, {'subjects_dir'}),
         "unpack": (unpack, {'subjects_dir'}),
@@ -158,7 +167,7 @@ if __name__ == '__main__':
             'subjects_dir', 'model_dir', 'model_name', 'iteration_goal'
         }),
         "swap_flexible_merge": (face_swap_merge_flexible_action, {'subjects_dir', 'model_dir', 'model_name'}),
-        "clea_flexible_train": (clean_flexible_train, {'model_dir'}),
+        "clean_flexible_train": (clean_flexible_train, {'model_dir'}),
         "face_swap_benchmark": (face_swap_bench, {
             'subjects_dir',
             'subject_src_id',
@@ -168,8 +177,8 @@ if __name__ == '__main__':
             'iteration_goal',
             'delta_iteration'
         }),
-        "metadata_pack": (dataframe_creation, {'subjects_dir', 'output_pickle'}),
-        "swap_extract": (swap_extract, {'subjects_dir', 'dim_output_faces', 'png_quality'})
+        "metadata_pack": (dataframe_creation, {'subjects_dir', 'output_pickle'})
+        # "swap_extract": (swap_extract, {'subjects_dir', 'dim_output_faces', 'png_quality'})
     }
 
     action = args["action"]

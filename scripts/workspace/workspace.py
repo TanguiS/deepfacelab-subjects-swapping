@@ -39,33 +39,32 @@ def create_subject_workspace(subjects_path: Path, dim: Optional[int] = None, qua
     subjects = load_subjects(subjects_path, dim, quality)
     data_augmentation_rd = subjects_path.joinpath(WorkspaceStr.augmentation.value)
     data_augmentation_rd.mkdir(exist_ok=True)
-    data_augmentation_rd.joinpath(WorkspaceStr.r_aug.value).mkdir(exist_ok=True)
-    data_augmentation_rd.joinpath(WorkspaceStr.f_aug.value).mkdir(exist_ok=True)
+    real = data_augmentation_rd.joinpath(WorkspaceStr.real_aug.value)
+    real.mkdir(exist_ok=True)
+    real.joinpath(WorkspaceStr.frames.value).mkdir(exist_ok=True)
+    fake = data_augmentation_rd.joinpath(WorkspaceStr.fake_aug.value)
+    fake.mkdir(exist_ok=True)
+    fake.joinpath(WorkspaceStr.frames.value).mkdir(exist_ok=True)
 
     for subject_1 in subjects:
-        subject_1.original_frames().mkdir(exist_ok=True)
-        subject_1.aligned_frames().mkdir(exist_ok=True)
-        subject_1.merged_frames_dir().mkdir(exist_ok=True)
-        subject_1.merged_videos_dir().mkdir(exist_ok=True)
-        subject_1.face_frames().mkdir(exist_ok=True)
+        subject_1.frame.original.frames_dir().mkdir(exist_ok=True)
+        subject_1.frame.original.aligned_dir().mkdir(exist_ok=True)
+        subject_1.frame.merged.frames_dir().mkdir(exist_ok=True)
+        subject_1.video.merged_videos_dir().mkdir(exist_ok=True)
+        subject_1.frame.face.frames_dir().mkdir(exist_ok=True)
         for subject_2 in subjects:
             if subject_1 == subject_2:
                 continue
-            subject_1.merged_frames_from(subject_2.id()).mkdir(exist_ok=True)
-            subject_1.mask_frames_from(subject_2.id()).mkdir(exist_ok=True)
-            subject_1.face_merged_frames_from(subject_2.id()).mkdir(exist_ok=True)
+            subject_1.frame.merged.frames_dir_from(subject_2.id()).mkdir(exist_ok=True)
+            subject_1.frame.merged.mask_frames_dir_from(subject_2.id()).mkdir(exist_ok=True)
+            subject_1.frame.face.frames_dir_from(subject_2.id()).mkdir(exist_ok=True)
 
 
 def random_data_augmentation_tree(subjects_path: Path) -> Tuple[Path, Path, Path]:
     data_augmentation_rd = subjects_path.joinpath(WorkspaceStr.augmentation.value)
-    fake_data = data_augmentation_rd.joinpath(WorkspaceStr.f_aug.value)
-    real_data = data_augmentation_rd.joinpath(WorkspaceStr.r_aug.value)
+    fake_data = data_augmentation_rd.joinpath(WorkspaceStr.fake_aug.value)
+    real_data = data_augmentation_rd.joinpath(WorkspaceStr.real_aug.value)
     return data_augmentation_rd, fake_data, real_data
-
-
-def clean_subjects_workspace(subjects: List[Subject]) -> None:
-    for subject in subjects:
-        subject.clean()
 
 
 def load_subjects(subjects_path: Path, dim: Optional[int] = None, quality: Optional[int] = None) -> List[Subject]:

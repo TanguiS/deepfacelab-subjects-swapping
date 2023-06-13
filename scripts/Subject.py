@@ -4,6 +4,12 @@ from typing import Tuple, Union, List
 from scripts.workspace.WorkspaceEnum import WorkspaceStr
 
 
+def parse_subject_tags(tag: Path) -> Tuple[int, int]:
+    tag_name = tag.name[5:]
+    dim, quality = tag_name.split("_")
+    return int(dim), int(quality)
+
+
 class Subject:
     def __init__(self, subject_path: Path, dim: Union[int, any] = None, quality: Union[int, any] = None) -> None:
         self.__root = subject_path
@@ -15,7 +21,7 @@ class Subject:
 
             elif len(available_tags) == 1:
                 print(f"Found 1 tag : {available_tags[0]}")
-                self.__dim, self.__quality = self.__parse_subject_tags(available_tags[0])
+                self.__dim, self.__quality = parse_subject_tags(available_tags[0])
             else:
                 print("/!\\ More than 1 tag is present, clean the workspace.")
                 raise Exception("Feature not implemented.")
@@ -23,18 +29,15 @@ class Subject:
             self.__dim = dim
             self.__quality = quality
 
-        self.__raw_tag = subject_path.joinpath(f".tag_{self.__dim}_{self.__quality}")
-        self.__swap_tag_name = f".tag_{self.__dim}_{self.__quality}"
-        self.__merged = ".done"
+        self.__original_tag = subject_path.joinpath(f".tag_{self.__dim}_{self.__quality}")
+
+        self.__video = Video(self)
+        self.__frame = Frame(self, self.__original_tag)
+        self.__clean = Clean(self)
 
     def __find_available_tags(self) -> List[Path]:
         tags = list(self.__root.glob(".tag_*"))
         return tags
-
-    def __parse_subject_tags(self, tag: Path) -> Tuple[int, int]:
-        tag_name = tag.name[5:]
-        dim, quality = tag_name.split("_")
-        return int(dim), int(quality)
 
     def id(self) -> int:
         return int(self.__root.as_posix().split("_")[-1])
@@ -45,98 +48,178 @@ class Subject:
     def root_dir(self) -> Path:
         return self.__root
 
+    def __str__(self) -> str:
+        return f"subject id : {self.id()}"
+
+    @property
+    def video(self):
+        return self.__video
+
+    @property
+    def frame(self):
+        return self.__frame
+
+    @property
+    def clean(self):
+        return self.__clean
+
+
+class Video:
+    def __init__(self, subject: Subject) -> None:
+        super().__init__()
+        self.__subject = subject
+
     def original_video(self) -> Path:
-        output = [video for video in self.__root.glob(WorkspaceStr.videos.value)]
+        output = [video for video in self.__subject.root_dir().glob(WorkspaceStr.videos.value)]
         if len(output) > 1:
             raise KeyError(f"Error, multiple videos found for pattern : {WorkspaceStr.videos.value}, videos found : " +
-                           f"{output} in subject id {self.id()}")
+                           f"{output} in subject id {self.__subject.id()}")
         if len(output) == 0:
-            raise KeyError(f"Error, no original video found in subject id : {self.id()}.")
+            raise KeyError(f"Error, no original video found in subject id : {self.__subject.id()}.")
         return output[0]
 
-    def original_frames(self) -> Path:
-        return self.__root.joinpath(WorkspaceStr.frames.value)
-
     def merged_videos_dir(self) -> Path:
-        return self.__root.joinpath(WorkspaceStr.s_videos.value)
+        return self.__subject.root_dir().joinpath(WorkspaceStr.merged_videos.value)
 
-    def merged_videos_from(self, subject_id: int) -> Path:
+    def merged_videos_from_subject_id(self, subject_id: int) -> Path:
         return self.merged_videos_dir().joinpath(f"result_from_{subject_id}.mp4")
 
-    def merged_frames_dir(self) -> Path:
-        return self.__root.joinpath(WorkspaceStr.s_frames.value)
 
-    def merged_frames_from(self, subject_id: int) -> Path:
-        return self.merged_frames_dir().joinpath(WorkspaceStr.dst_video.value + str(subject_id))
+class Frame:
+    def __init__(self, subject: Subject, tag: Path) -> None:
+        super().__init__()
+        self.__subject = subject
 
-    def face_merged_frames_from(self, subject_id: int) -> Path:
-        return self.merged_frames_from(subject_id).joinpath(WorkspaceStr.face.value)
+        self.__original = Original(self.__subject, tag)
+        self.__merged = Merged(self.__subject)
+        self.__face = Face(self.__subject)
 
-    def mask_frames_from(self, subject_id: int):
-        return self.merged_frames_from(subject_id).joinpath(WorkspaceStr.mask.value)
+    @property
+    def original(self):
+        return self.__original
 
-    def aligned_frames(self) -> Path:
-        return self.__root.joinpath(WorkspaceStr.frames.value).joinpath(WorkspaceStr.aligned.value)
+    @property
+    def merged(self):
+        return self.__merged
 
-    def face_frames(self) -> Path:
-        return self.__root.joinpath(WorkspaceStr.frames.value).joinpath(WorkspaceStr.face.value)
+    @property
+    def face(self):
+        return self.__face
 
-    def raw_extract_done(self) -> None:
-        if not self.__raw_tag.exists():
-            self.__raw_tag.touch()
 
-    def swap_extract_done_from(self, subject_id: int) -> None:
-        tag = self.merged_frames_from(subject_id).joinpath(self.__swap_tag_name)
+class Original:
+    def __init__(self, subject: Subject, tag: Path) -> None:
+        super().__init__()
+        self.__subject = subject
+
+        self.__original_tag = tag
+
+    def frames_dir(self) -> Path:
+        return self.__subject.root_dir().joinpath(WorkspaceStr.frames.value)
+
+    def aligned_dir(self) -> Path:
+        return self.__subject.root_dir().joinpath(WorkspaceStr.frames.value).joinpath(WorkspaceStr.aligned.value)
+
+    def align_extract_done(self) -> None:
+        if not self.__original_tag.exists():
+            self.__original_tag.touch()
+
+    def is_align_extract_done(self) -> bool:
+        return self.__original_tag.exists()
+
+
+class Merged:
+    def __init__(self, subject: Subject) -> None:
+        super().__init__()
+        self.__subject = subject
+
+        self.__tag_merged = ".done"
+
+    def frames_dir(self) -> Path:
+        return self.__subject.root_dir().joinpath(WorkspaceStr.merged_frames.value)
+
+    def frames_dir_from(self, subject_id: int) -> Path:
+        return self.frames_dir().joinpath(WorkspaceStr.merged_dst.value + str(subject_id))
+
+    def mask_frames_dir_from(self, subject_id: int):
+        return self.frames_dir_from(subject_id).joinpath(WorkspaceStr.mask.value)
+
+    def merging_done_from(self, subject_id: int) -> None:
+        self.frames_dir_from(subject_id).joinpath(self.__tag_merged).touch(exist_ok=True)
+
+    def is_merging_from_is_done(self, subject_id: int) -> bool:
+        return self.frames_dir_from(subject_id).joinpath(self.__tag_merged).exists()
+
+
+class Face:
+    def __init__(self, subject: Subject) -> None:
+        super().__init__()
+        self.__subject = subject
+
+    def frames_dir(self) -> Path:
+        return self.__subject.root_dir().joinpath(WorkspaceStr.frames.value).joinpath(WorkspaceStr.face.value)
+
+    def frames_dir_from(self, subject_id: int) -> Path:
+        return self.__subject.frame.merged.frames_dir_from(subject_id).joinpath(WorkspaceStr.face.value)
+
+    def extracting_done_from(self, subject_id: int, max_shape: int) -> None:
+        tag = self.frames_dir_from(subject_id).joinpath(
+            f".tag_{max_shape}.done")
         if not tag.exists():
             tag.touch()
 
-    def is_raw_extract_done(self) -> bool:
-        return self.__raw_tag.exists()
+    def is_extracting_done_from(self, subject_id: int, max_shape: int) -> bool:
+        tag = self.frames_dir_from(subject_id).joinpath(
+            f".tag_{max_shape}.done")
+        return tag.exists()
 
-    def is_swap_extract_done_from(self, subject_id: int) -> bool:
-        return self.merged_frames_from(subject_id).joinpath(self.__swap_tag_name).exists()
+    def extracting_done(self, max_shape: int) -> None:
+        tag = self.frames_dir().joinpath(f".tag_{max_shape}.done")
+        if not tag.exists():
+            tag.touch()
 
-    def merged_done_from(self, subject_id: int) -> None:
-        self.merged_frames_from(subject_id).joinpath(self.__merged).touch(exist_ok=True)
+    def is_extracting_done(self, max_shape: int) -> bool:
+        tag = self.frames_dir().joinpath(f".tag_{max_shape}.done")
+        return tag.exists()
 
-    def is_merged_from_is_done(self, subject_id: int) -> bool:
-        return self.merged_frames_from(subject_id).joinpath(self.__merged).exists()
+
+class Clean:
+    def __init__(self, subject: Subject) -> None:
+        super().__init__()
+        self.__subject = subject
 
     def clean_alignment(self) -> None:
         import shutil
 
-        aligned_dir = self.aligned_frames()
+        aligned_dir = self.__subject.frame.original.aligned_dir()
         if aligned_dir.exists():
             shutil.rmtree(aligned_dir)
         aligned_dir.mkdir(exist_ok=True)
-        for tag in self.__root.glob(".tag*"):
+        for tag in self.__subject.root_dir().glob(".tag*"):
             tag.unlink()
 
     def clean_mask_from(self, subject_id: int) -> None:
         import shutil
 
-        masks_dir = self.mask_frames_from(subject_id)
+        masks_dir = self.__subject.frame.merged.mask_frames_dir_from(subject_id)
         if masks_dir.exists():
             shutil.rmtree(masks_dir)
 
-    def clean_workspace(self) -> None:
+    def clean_merged(self) -> None:
         import shutil
 
-        if self.merged_frames_dir().exists():
-            shutil.rmtree(self.merged_frames_dir())
-        if self.merged_videos_dir().exists():
-            shutil.rmtree(self.merged_videos_dir())
+        if self.__subject.frame.merged.frames_dir().exists():
+            shutil.rmtree(self.__subject.frame.merged.frames_dir())
+        if self.__subject.video.merged_videos_dir().exists():
+            shutil.rmtree(self.__subject.video.merged_videos_dir())
 
-    def clean(self):
+    def clean_all(self):
         import shutil
 
-        for directory in [self.__root.joinpath(WorkspaceStr.s_videos.value),
-                          self.__root.joinpath(WorkspaceStr.s_frames.value),
-                          self.__root.joinpath(WorkspaceStr.frames.value)]:
+        for directory in [self.__subject.root_dir().joinpath(WorkspaceStr.merged_videos.value),
+                          self.__subject.root_dir().joinpath(WorkspaceStr.merged_frames.value),
+                          self.__subject.root_dir().joinpath(WorkspaceStr.frames.value)]:
             if directory.exists():
                 shutil.rmtree(directory)
-        for tag in self.__root.glob(".tag*"):
+        for tag in self.__subject.root_dir().glob(".tag*"):
             tag.unlink()
-
-    def __str__(self) -> str:
-        return f"subject id : {self.id()}"

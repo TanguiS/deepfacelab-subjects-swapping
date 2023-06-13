@@ -138,9 +138,10 @@ def update_subject_workspace_action_parser(subparsers):
 
 
 def clean_action_parser(subparsers):
-    parser_clean = subparsers.add_parser("clean", help="Clean workspace")
+    parser_clean = subparsers.add_parser("clean", help="Completely clean workspace, except if other option are given.")
     parser_clean.add_argument("--subjects_dir", type=Path, help="Path to the subjects directory")
-    parser_clean.add_argument("--redo_merged_workspace", action='store_true')
+    parser_clean.add_argument("--redo_merged", action='store_true', help="Clean only the merged folder")
+    parser_clean.add_argument("--redo_original", action='store_true', help="Clean only the frames and alignment folder")
 
 
 def to_subject_action_parser(subparsers):

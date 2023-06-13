@@ -46,25 +46,25 @@ def create(subjects_dir: Path, output_pickle_dataframe: Path) -> None:
     indexer = []
 
     for subject_src in subjects:
-        aligned_frames = [frame for frame in subject_src.aligned_frames().glob("*.jpg")]
+        aligned_frames = [frame for frame in subject_src.frame.original.aligned_dir().glob("*.jpg")]
 
-        put_item(indexer, aligned_frames, subjects_dir, subject_src.original_video(), False)
+        put_item(indexer, aligned_frames, subjects_dir, subject_src.video.original_video(), False)
 
         for subject_dst in subjects:
             if subject_src == subject_dst:
                 continue
 
             aligned_merged_frames = [
-                frame for frame in subject_src.merged_frames_from(subject_dst.id()).glob("*.png")
+                frame for frame in subject_src.frame.merged.frames_dir_from(subject_dst.id()).glob("*.png")
             ]
 
             put_item(
                 indexer,
                 aligned_merged_frames,
                 subjects_dir,
-                subject_src.merged_videos_from(subject_dst.id()),
+                subject_src.video.merged_videos_from_subject_id(subject_dst.id()),
                 True,
-                subject_src.original_video()
+                subject_src.video.original_video()
             )
             progress_bar.update(1)
 

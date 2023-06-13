@@ -35,7 +35,7 @@ def run_merge_mp4(merged_input_dir: Path, subject_dst: Subject):
     print(f"merging to mp4 : {[merged_input_dir, str(subject_dst)]}")
     util.proxy_merge_mp4(input_dir=merged_input_dir,
                          output_file=merged_input_dir.joinpath("output.mp4"),
-                         reference_file=subject_dst.original_video())
+                         reference_file=subject_dst.video.original_video())
 
 
 def keep_one_image(merged_input_dir: Path) -> None:
@@ -62,7 +62,7 @@ def launch(
     gpu_indexes = util.choose_gpu_index()
     workspace.benchmark_workspace(output_dir, models_name, max_iteration, delta_iteration)
     write_bench(output_dir, "Model", "Iteration", "Start time", "End time")
-    ref_file(subject_src.original_frames(), output_dir)
+    ref_file(subject_src.frame.original.frames_dir(), output_dir)
 
     for model_name in models_name:
         tmp_mask_dir = output_dir.joinpath(model_name).joinpath(WorkspaceStr.tmp_save.value)
@@ -79,8 +79,8 @@ def launch(
             end_time = datetime.now().strftime("%H:%M:%S")
 
             process_merge = multiprocessing.Process(target=run_proxy_merge, args=(
-                models_dir, model_name, subject_dst.original_frames(), current_output_dir, tmp_mask_dir,
-                subject_dst.aligned_frames(), gpu_indexes
+                models_dir, model_name, subject_dst.frame.original.frames_dir(), current_output_dir, tmp_mask_dir,
+                subject_dst.frame.original.aligned_dir(), gpu_indexes
             ))
             process_merge.start()
             process_merge.join()

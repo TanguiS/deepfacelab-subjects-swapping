@@ -69,19 +69,19 @@ def merge(
     util.proxy_merge(
         model_dir=model_dir,
         model_name=model_name,
-        input_path=subject_dst.original_frames(),
-        output_path=subject_src.merged_frames_from(subject_dst.id()),
-        output_mask_path=subject_src.mask_frames_from(subject_dst.id()),
-        aligned_path=subject_dst.aligned_frames(),
+        input_path=subject_dst.frame.original.frames_dir(),
+        output_path=subject_src.frame.merged.frames_dir_from(subject_dst.id()),
+        output_mask_path=subject_src.frame.merged.mask_frames_dir_from(subject_dst.id()),
+        aligned_path=subject_dst.frame.original.aligned_dir(),
         gpu_indexes=gpu_indexes
     )
 
 
 def merge_mp4(subject_src: Subject, subject_dst: Subject) -> None:
     proxy_merge_mp4(
-        input_dir=subject_src.merged_frames_from(subject_dst.id()),
-        output_file=subject_src.merged_videos_dir().joinpath(f"result_from_{subject_dst.id()}.mp4"),
-        reference_file=subject_dst.original_video()
+        input_dir=subject_src.frame.merged.frames_dir_from(subject_dst.id()),
+        output_file=subject_src.video.merged_videos_dir().joinpath(f"result_from_{subject_dst.id()}.mp4"),
+        reference_file=subject_dst.frame.original.original_video()
     )
 
 
@@ -114,8 +114,8 @@ def launch_auto(
 
     for i, subject_src in enumerate(subjects):
         for j, subject_dst in enumerate(subjects):
-            if i == j or subject_src.is_merged_from_is_done(subject_dst.id()):
-                subject_src.clean_mask_from(subject_dst.id())
+            if i == j or subject_src.frame.merged.is_merging_from_is_done(subject_dst.id()):
+                subject_src.clean.clean_mask_from(subject_dst.id())
                 continue
             silent_start = i != 0
             move_model(model_dir, model_name)
@@ -132,9 +132,9 @@ def launch_auto(
             process.start()
             process.join()
 
-            subject_src.merged_done_from(subject_dst.id())
+            subject_src.frame.merged.merging_done_from(subject_dst.id())
             merge_mp4(subject_src, subject_dst)
-            subject_src.clean_mask_from(subject_dst.id())
+            subject_src.clean.clean_mask_from(subject_dst.id())
 
     to_delete = model_dir.joinpath(WorkspaceStr.tmp_save.value)
     shutil.rmtree(to_delete)
@@ -213,10 +213,10 @@ def flexible_merge(model_dir: Path, model_name: str, subject_src: Subject, subje
         "--model", 'SAEHD',
         "--model-dir", str(model_dir),
         "--force-model-name", model_name,
-        "--input-dir", str(subject_dst.original_frames()),
-        "--output-dir", str(subject_src.merged_frames_from(subject_dst.id())),
-        "--output-mask-dir", str(subject_src.mask_frames_from(subject_dst.id())),
-        "--aligned-dir",  str(subject_dst.aligned_frames())
+        "--input-dir", str(subject_dst.frame.original.frames_dir()),
+        "--output-dir", str(subject_src.frame.merged.frames_dir_from(subject_dst.id())),
+        "--output-mask-dir", str(subject_src.frame.merged.mask_frames_dir_from(subject_dst.id())),
+        "--aligned-dir",  str(subject_dst.frame.original.aligned_dir())
     ]
     command_str = " ".join(command)
     print(command_str)
@@ -243,8 +243,8 @@ def launch_flexible_merge(
 
     for i, subject_src in enumerate(subjects):
         for j, subject_dst in enumerate(subjects):
-            if i == j or subject_src.is_merged_from_is_done(subject_dst.id()):
-                subject_src.clean_mask_from(subject_dst.id())
+            if i == j or subject_src.frame.merged.is_merging_from_is_done(subject_dst.id()):
+                subject_src.clean.clean_mask_from(subject_dst.id())
                 continue
             current_model_dir = model_dir.joinpath(
                 WorkspaceStr.flex_model.value
@@ -254,6 +254,6 @@ def launch_flexible_merge(
 
             flexible_merge(current_model_dir, model_name, subject_src, subject_dst)
 
-            subject_src.merged_done_from(subject_dst.id())
+            subject_src.frame.merged.merging_done_from(subject_dst.id())
             merge_mp4(subject_src, subject_dst)
-            subject_src.clean_mask_from(subject_dst.id())
+            subject_src.clean.clean_mask_from(subject_dst.id())
