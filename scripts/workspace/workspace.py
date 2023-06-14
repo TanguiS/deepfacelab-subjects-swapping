@@ -5,7 +5,7 @@ from typing import List, Optional, Tuple
 from tqdm import tqdm
 
 from scripts.Subject import Subject
-from scripts.workspace.WorkspaceEnum import WorkspaceStr
+from scripts.workspace.WorkspaceEnum import WorkspaceStr, video_extensions
 
 
 def videos_to_subject(input_videos_dir: Path, output_subjects_dir: Path) -> None:
@@ -13,13 +13,6 @@ def videos_to_subject(input_videos_dir: Path, output_subjects_dir: Path) -> None
             or not output_subjects_dir.is_dir() or not output_subjects_dir.exists():
         raise NotADirectoryError(f"Error with input: 1: {input_videos_dir}, 2: {output_subjects_dir}")
 
-    video_extensions = {
-        ".3g2", ".3gp", ".amv", ".asf", ".avi", ".drc", ".flv", ".f4v", ".f4p", ".f4a",
-        ".f4b", ".gif", ".gifv", ".m4v", ".mkv", ".mng", ".mov", ".mp2", ".mp4", ".m4p",
-        ".m4v", ".mpg", ".mp2", ".mpeg", ".mpe", ".mpv", ".mpg", ".mpeg", ".m2v", ".m4v",
-        ".mxf", ".nsv", ".ogg", ".ogv", ".qt", ".rm", ".rmvb", ".roq", ".svi", ".vob",
-        ".webm", ".wmv", ".yuv"
-    }
     videos = [
         file for file in input_videos_dir.rglob("*")
         if file.suffix.lower() in video_extensions and not file.name.startswith(".")
@@ -30,7 +23,7 @@ def videos_to_subject(input_videos_dir: Path, output_subjects_dir: Path) -> None
     for video in tqdm(videos, total=total):
         subject_dir = output_subjects_dir.joinpath(WorkspaceStr.subject.value + str(next_id))
         subject_dir.mkdir(exist_ok=False)
-        output_video_dir = subject_dir.joinpath(WorkspaceStr.videos.value[:-2] + video.suffix)
+        output_video_dir = subject_dir.joinpath(WorkspaceStr.videos_pattern.value[:-2] + video.suffix)
         shutil.copy(video, output_video_dir)
         next_id += 1
 
@@ -39,12 +32,11 @@ def create_subject_workspace(subjects_path: Path, dim: Optional[int] = None, qua
     subjects = load_subjects(subjects_path, dim, quality)
     data_augmentation_rd = subjects_path.joinpath(WorkspaceStr.augmentation.value)
     data_augmentation_rd.mkdir(exist_ok=True)
-    real = data_augmentation_rd.joinpath(WorkspaceStr.real_aug.value)
-    real.mkdir(exist_ok=True)
-    real.joinpath(WorkspaceStr.frames.value).mkdir(exist_ok=True)
-    fake = data_augmentation_rd.joinpath(WorkspaceStr.fake_aug.value)
-    fake.mkdir(exist_ok=True)
-    fake.joinpath(WorkspaceStr.frames.value).mkdir(exist_ok=True)
+    for sub_folder_name in (WorkspaceStr.real_aug.value, WorkspaceStr.fake_aug.value):
+        sub_folder = data_augmentation_rd.joinpath(sub_folder_name)
+        sub_folder.mkdir(exist_ok=True)
+        for sub_sub_folder_name in (WorkspaceStr.frames.value, WorkspaceStr.videos.value, WorkspaceStr.face.value):
+            sub_folder.joinpath(sub_sub_folder_name).mkdir(exist_ok=True)
 
     for subject_1 in subjects:
         subject_1.frame.original.frames_dir().mkdir(exist_ok=True)

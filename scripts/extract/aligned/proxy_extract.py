@@ -3,20 +3,11 @@ from typing import List
 
 from core import osex
 from scripts.Subject import Subject
-from mainscripts import VideoEd, Extractor, Sorter, Util
+from mainscripts import Extractor, Sorter, Util
+from scripts.extract.util import video_to_frames
 
 
-def video_to_frames(input_video: Path, output_dir: Path) -> None:
-    osex.set_process_lowest_prio()
-    VideoEd.extract_video(
-        input_file=input_video,
-        output_dir=output_dir,
-        output_ext='png',
-        fps=0
-    )
-
-
-def extract_face(
+def extract_align_face(
     input_dir: Path,
     output_dir: Path,
     face_type: str,
@@ -61,7 +52,7 @@ def launch(subjects: List[Subject], face_type: str, image_size: int, jpeg_qualit
             continue
         subject.clean.clean_alignment()
         video_to_frames(subject.video.original_video(), subject.frame.original.frames_dir())
-        extract_face(subject.frame.original.frames_dir(), subject.frame.original.aligned_dir(), face_type, image_size, jpeg_quality)
+        extract_align_face(subject.frame.original.frames_dir(), subject.frame.original.aligned_dir(), face_type, image_size, jpeg_quality)
         sort_dir_by_hist(subject.frame.original.aligned_dir())
         subject.frame.original.align_extract_done()
         to_recover.append(subject)

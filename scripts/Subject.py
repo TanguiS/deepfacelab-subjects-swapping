@@ -70,9 +70,9 @@ class Video:
         self.__subject = subject
 
     def original_video(self) -> Path:
-        output = [video for video in self.__subject.root_dir().glob(WorkspaceStr.videos.value)]
+        output = [video for video in self.__subject.root_dir().glob(WorkspaceStr.videos_pattern.value)]
         if len(output) > 1:
-            raise KeyError(f"Error, multiple videos found for pattern : {WorkspaceStr.videos.value}, videos found : " +
+            raise KeyError(f"Error, multiple videos found for pattern : {WorkspaceStr.videos_pattern.value}, videos found : " +
                            f"{output} in subject id {self.__subject.id()}")
         if len(output) == 0:
             raise KeyError(f"Error, no original video found in subject id : {self.__subject.id()}.")

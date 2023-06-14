@@ -5,7 +5,7 @@ from pathlib import Path
 from core import pathex
 from core.interact import interact as io
 
-def extract_video(input_file, output_dir, output_ext=None, fps=None):
+def extract_video(input_file, output_dir, output_ext=None, fps=None, output_name_stem=None):
     input_file_path = Path(input_file)
     output_path = Path(output_dir)
 
@@ -41,7 +41,10 @@ def extract_video(input_file, output_dir, output_ext=None, fps=None):
     if output_ext == 'jpg':
         kwargs.update ({'q:v':'2'}) #highest quality for jpg
 
-    job = job.output( str (output_path / ('%5d.'+output_ext)), **kwargs )
+    output_file = str(output_path / ('%5d.'+output_ext))
+    if output_name_stem is not None:
+        output_file = str(output_path / (output_name_stem + '_' + '%5d.'+output_ext))
+    job = job.output(output_file, **kwargs)
 
     try:
         job = job.run()

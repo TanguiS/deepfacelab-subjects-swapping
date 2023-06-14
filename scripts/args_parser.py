@@ -41,7 +41,21 @@ def args_parser() -> Dict[str, any]:
 
     extract_face_from_subject_action_parser(subparsers)
 
+    extract_face_from_video_data_augmentation_action_parser(subparsers)
+
     return vars(parser.parse_args())
+
+
+def extract_face_from_video_data_augmentation_action_parser(subparsers):
+    extract_face = subparsers.add_parser("extract_face_from_video_data_augmentation",
+                                         help="Extract frames from all videos contained in the data augmentation" +
+                                              " folder, Warning, only video and no sub_folder.")
+    extract_face.add_argument("--subjects_dir", type=Path, help="Path to the subjects directory")
+    extract_face.add_argument("--model_dir", type=Path, help="Path to the onxx models directory for YuNet class")
+    extract_face.add_argument("--input_shape", type=int,
+                              help="Square shape of the input YuNet class for face extraction")
+    extract_face.add_argument("--max_shape", type=int,
+                              help="Shape of the output faces, should be less than shape")
 
 
 def extract_face_from_subject_action_parser(subparsers):
@@ -54,7 +68,6 @@ def extract_face_from_subject_action_parser(subparsers):
                                      help="Square shape of the input YuNet class for face extraction")
     parser_extract_face.add_argument("--max_shape", type=int,
                                      help="Shape of the output faces, should be less than shape")
-
 
 
 def clean_flexible_train_action_parser(subparsers):
@@ -93,6 +106,7 @@ def dataframe_action_parser(subparsers):
     parser_dataframe.add_argument("--output_pickle", type=Path, default=None, help="Output path for the dataframe, " +
                                                                                    "by default : " +
                                                                                    " --subjects_dir/dataframe.pkl")
+    parser_dataframe.add_argument("--similarity_check", action='store_true', help="Verify images with SSHA256")
 
 
 def face_swap_benchmark_action_parser(subparsers):

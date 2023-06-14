@@ -67,7 +67,6 @@ def extract_face_from_list(
 
 def extract_face_from_subject(subjects: List[Subject], face_detector_model: YuNet, max_shape: int = 112):
     total_it = len(subjects) * (len(subjects) - 1)
-    max_progress_per_subject = 1
     progress_bar = tqdm(total=total_it, desc=" Extracting faces from subjects", unit=" Subject")
     for subject_src in subjects:
         for subject_dst in subjects:
@@ -97,12 +96,4 @@ def extract_face_from_subject(subjects: List[Subject], face_detector_model: YuNe
         subject_src.frame.face.extracting_done(max_shape)
         progress_bar.update(1)
 
-
-if __name__ == '__main__':
-    model_dir = Path('C:\\WORK\\model')
-    # model_feature_extraction = load_model(model_dir)
-    shape = (720, 720)
-    face_detector = load_face_detection_model(model_dir, input_size=shape)
-    str_reference_image_path = "D:\\storage-photos\\benchmark\\reference_face.png"
-    str_probe_image_path = "D:\\storage-photos\\benchmark\\p384dfudt\\1900\\00042.png"
-    extract_face(Path(str_probe_image_path), face_detector, max_shape=384)
+    progress_bar.close()

@@ -5,7 +5,7 @@ import scripts.train.util
 import scripts.util
 from scripts import args_parser
 from scripts.benchmark import face_swap_benchmark
-from scripts.extract import facet_pack, facet_unpack
+from scripts.extract import facet_pack, facet_unpack, random_data_augmentation
 from scripts.extract.aligned import proxy_extract
 from scripts.extract.face import face_extract
 from scripts.train import proxy_train, face_swap
@@ -135,13 +135,20 @@ def workspace_setup(args: Dict[str, any]):
     try:
         workspace.create_subject_workspace(args['subjects_dir'], args['dim_output_faces'], args['png_quality'])
     except KeyError:
-        workspace.create_subject_workspace(args['subjects_dir'])
+        try:
+            workspace.create_subject_workspace(args['subjects_dir'])
+        except ValueError as e:
+            print(e)
 
 
-def dataframe_creation(subjects_dir: Path, output_pickle: Optional[Path] = None) -> None:
+def dataframe_creation(
+        subjects_dir: Path,
+        output_pickle: Optional[Path] = None,
+        similarity_check: bool = False
+) -> None:
     if output_pickle is None:
         output_pickle = subjects_dir.joinpath("dataframe.pkl")
-    dataframe.create(subjects_dir, output_pickle)
+    dataframe.create(subjects_dir, output_pickle, similarity_check)
 
 
 def extract_face_from_subject(subjects_dir: Path, model_dir: Path, input_shape: int, max_shape: int) -> None:
@@ -151,6 +158,19 @@ def extract_face_from_subject(subjects_dir: Path, model_dir: Path, input_shape: 
     subjects = workspace.load_subjects(subjects_dir)
     face_detector = load_face_detection_model(model_dir, input_size=shape)
     face_extract.extract_face_from_subject(subjects, face_detector, max_shape)
+
+
+def extract_face_from_video_data_augmentation(
+        subjects_dir: Path,
+        model_dir: Path,
+        input_shape: int,
+        max_shape: int
+) -> None:
+    from scripts.extract.face.FaceDetectorResult import load_face_detection_model
+    shape = (input_shape, input_shape)
+    face_detector = load_face_detection_model(model_dir, input_size=shape)
+    random_data_augmentation.launch_video_extract_frames(subjects_dir)
+    random_data_augmentation.launch_face_extract_frames(subjects_dir, face_detector, max_shape)
 
 
 
@@ -190,6 +210,12 @@ if __name__ == '__main__':
         }),
         "metadata_pack": (dataframe_creation, {'subjects_dir', 'output_pickle'}),
         "extract_face_from_subject": (extract_face_from_subject, {
+            'subjects_dir',
+            'model_dir',
+            'input_shape',
+            'max_shape'
+        }),
+        "extract_face_from_video_data_augmentation": (extract_face_from_video_data_augmentation, {
             'subjects_dir',
             'model_dir',
             'input_shape',
