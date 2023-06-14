@@ -205,6 +205,7 @@ def launch_flexible_train(
             ))
             process.start()
             process.join()
+            model_on_src_dst_is_done(model_dir, subject_src.id(), subject_dst.id())
 
 
 def flexible_merge(model_dir: Path, model_name: str, subject_src: Subject, subject_dst: Subject) -> None:
