@@ -66,7 +66,8 @@ class SAEHDModel(ModelBase):
             self.options['pretrain'] = False
             io.log_info(f"Target iteration given by args : {self.options['target_iter']}, pretrain set to false")
 
-        ask_override = self.ask_override()
+        ask_override = io.input_bool("Press [y] to ask override", False)
+
 
         if self.is_first_run() or ask_override:
             self.ask_autobackup_hour()
