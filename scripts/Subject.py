@@ -36,7 +36,7 @@ class Subject:
         self.__clean = Clean(self)
 
     def __find_available_tags(self) -> List[Path]:
-        tags = list(self.__root.glob(".tag_*"))
+        tags = [file for file in self.__root.glob(".tag_*")]
         return tags
 
     def id(self) -> int:

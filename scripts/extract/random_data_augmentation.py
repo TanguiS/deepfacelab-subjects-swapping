@@ -1,6 +1,6 @@
 import shutil
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 
 import pandas as pd
 from pandas import DataFrame
@@ -12,7 +12,7 @@ from scripts.extract.face.yunet import YuNet
 from scripts.workspace.WorkspaceEnum import WorkspaceStr, video_extensions
 
 
-def load_asset(subjects_dir):
+def load_asset(subjects_dir: Path) -> Tuple[DataFrame, Path, Path]:
     rd_data_aug = subjects_dir.joinpath(WorkspaceStr.augmentation.value)
     df_history_path = rd_data_aug.joinpath("history.pkl")
     if df_history_path.exists():
@@ -23,7 +23,7 @@ def load_asset(subjects_dir):
     return df_history, df_history_path, rd_data_aug
 
 
-def save_asset(df_history, df_history_path):
+def save_asset(df_history: DataFrame, df_history_path: Path) -> None:
     print(f"Saving dataframe to {df_history_path}...")
     df_history.to_pickle(str(df_history_path))
 
@@ -87,3 +87,25 @@ def launch_face_extract_frames(subjects_dir: Path, face_detector_model: YuNet, m
         df_history = df_history.append([{'processed': frame.name}], ignore_index=True)
 
     save_asset(df_history, df_history_path)
+
+
+def decode_specs_data_augmentation(subjects_dir: Path, original_video_stem: str, label: str) -> Tuple[Path, bool]:
+    video_path = subjects_dir.joinpath(
+        WorkspaceStr.augmentation.value).joinpath(
+        label).joinpath(
+        WorkspaceStr.videos.value
+    )
+    try:
+        original_video_path = [video for video in video_path.glob(f"{original_video_stem}*")][0]
+    except IndexError:
+        raise ValueError(f"Video : {original_video_stem} does not exists, frame will be skipped")
+
+    label = False if label == WorkspaceStr.fake_aug.value else True
+    return original_video_path, label
+
+
+def specs_face_data_augmentation(frame: Path) -> Tuple[str, str]:
+    split = frame.stem.split("_")
+    original_video_stem = "_".join(split[1:-1])
+    label = frame.parent.parent.name
+    return original_video_stem, label

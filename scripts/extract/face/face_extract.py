@@ -47,7 +47,7 @@ def are_subjects_extractable(subject_src: Subject, subject_dst: Subject, max_sha
 
 
 def is_subject_extractable(subject_src: Subject, max_shape: int) -> bool:
-    return subject_src.frame.face.is_extracting_done(max_shape)
+    return not subject_src.frame.face.is_extracting_done(max_shape)
 
 
 def extract_face_from_list(
@@ -66,7 +66,7 @@ def extract_face_from_list(
 
 
 def extract_face_from_subject(subjects: List[Subject], face_detector_model: YuNet, max_shape: int = 112):
-    total_it = len(subjects) * (len(subjects) - 1)
+    total_it = len(subjects) * (len(subjects) - 1) + len(subjects)
     progress_bar = tqdm(total=total_it, desc=" Extracting faces from subjects", unit=" Subject")
     for subject_src in subjects:
         for subject_dst in subjects:
