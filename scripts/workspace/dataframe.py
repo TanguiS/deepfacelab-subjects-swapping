@@ -116,7 +116,8 @@ def put_items_with_similarity_check(
         check_container.add(sha256_result)
 
 
-def check_item()
+def check_item():
+    pass
 
 def add_data_augmentation_dataframe(
         subjects_dir: Path,
@@ -138,7 +139,7 @@ def add_data_augmentation_dataframe(
         except ValueError as e:
             print(e)
             continue
-        putter(container, check_container, f)
+        # putter(container, check_container, f)
 
 
 

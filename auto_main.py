@@ -173,7 +173,6 @@ def extract_face_from_video_data_augmentation(
     random_data_augmentation.launch_face_extract_frames(subjects_dir, face_detector, max_shape)
 
 
-
 if __name__ == '__main__':
     import multiprocessing
 
@@ -183,7 +182,6 @@ if __name__ == '__main__':
     nn.initialize_main_env()
 
     args = args_parser.args_parser()
-    print("args : ", args)
 
     actions = {
         "to_subject": (videos_to_subjects, {'videos_dir', 'subjects_dir'}),
