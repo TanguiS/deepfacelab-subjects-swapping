@@ -81,7 +81,7 @@ def merge_mp4(subject_src: Subject, subject_dst: Subject) -> None:
     proxy_merge_mp4(
         input_dir=subject_src.frame.merged.frames_dir_from(subject_dst.id()),
         output_file=subject_src.video.merged_videos_dir().joinpath(f"result_from_{subject_dst.id()}.mp4"),
-        reference_file=subject_dst.frame.original.original_video()
+        reference_file=subject_dst.video.original_video()
     )
 
 
@@ -247,6 +247,7 @@ def launch_flexible_merge(
             if i == j or subject_src.frame.merged.is_merging_from_is_done(subject_dst.id()):
                 subject_src.clean.clean_mask_from(subject_dst.id())
                 continue
+            print(f"\nRunning flexible merge on subject src : {subject_src.id()} to subject dst {subject_dst.id()}\n")
             current_model_dir = model_dir.joinpath(
                 WorkspaceStr.flex_model.value
             ).joinpath(
