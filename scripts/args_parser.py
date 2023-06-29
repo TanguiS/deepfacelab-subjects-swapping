@@ -54,35 +54,35 @@ def frames_generated_benchmark_action_parser(subparsers):
     parser.add_argument("--model_dir", type=Path, help="Path to the onxx models directory for YuNet class and Mxnet "
                                                        "Module")
     parser.add_argument("--input_shape", type=int,
-                                     help="Square shape of the input YuNet class for face extraction")
+                        help="Square shape of the input YuNet class for face extraction")
     parser.add_argument("--max_shape", type=int,
-                                     help="Shape of the output faces, should be less than shape")
+                        help="Shape of the output faces, should be less than shape")
     parser.add_argument("--min_threshold", type=int, help="Minimum value to consider a face as recognized.")
     parser.add_argument("--confidence_percentage", type=float, help="Confidence level of face recognition: [0, 1]")
 
 
 def extract_face_from_video_data_augmentation_action_parser(subparsers):
     parser = subparsers.add_parser("extract_face_from_video_data_augmentation",
-                                         help="Extract frames from all videos contained in the data augmentation" +
-                                              " folder, Warning, only video and no sub_folder.")
+                                   help="Extract frames from all videos contained in the data augmentation" +
+                                        " folder, Warning, only video and no sub_folder.")
     parser.add_argument("--subjects_dir", type=Path, help="Path to the subjects directory")
     parser.add_argument("--model_dir", type=Path, help="Path to the onxx models directory for YuNet class")
     parser.add_argument("--input_shape", type=int,
-                              help="Square shape of the input YuNet class for face extraction")
+                        help="Square shape of the input YuNet class for face extraction")
     parser.add_argument("--max_shape", type=int,
-                              help="Shape of the output faces, should be less than shape")
+                        help="Shape of the output faces, should be less than shape")
 
 
 def extract_face_from_subject_action_parser(subparsers):
     parser = subparsers.add_parser("extract_face_from_subject", help="Extract faces from merged" +
-                                                                                  " and original frames folder" +
-                                                                                  " for every subject")
+                                                                     " and original frames folder" +
+                                                                     " for every subject")
     parser.add_argument("--subjects_dir", type=Path, help="Path to the subjects directory")
     parser.add_argument("--model_dir", type=Path, help="Path to the onxx models directory for YuNet class")
     parser.add_argument("--input_shape", type=int,
-                                     help="Square shape of the input YuNet class for face extraction")
+                        help="Square shape of the input YuNet class for face extraction")
     parser.add_argument("--max_shape", type=int,
-                                     help="Shape of the output faces, should be less than shape")
+                        help="Shape of the output faces, should be less than shape")
 
 
 def clean_flexible_train_action_parser(subparsers):
@@ -103,8 +103,8 @@ def swap_flexible_train_action_parser(subparsers):
     parser.add_argument("--model_dir", type=Path, help="Path to the models directory")
     parser.add_argument("--model_name", type=str, default="", help="Name of the SAEHD model")
     parser.add_argument("--iteration_goal", type=int, default=None, help="Iteration to reach " +
-                                                                                         " for each face swapping " +
-                                                                                         "operation")
+                                                                         " for each face swapping " +
+                                                                         "operation")
 
 
 def swap_extract_action_parser(subparsers):
@@ -116,28 +116,28 @@ def swap_extract_action_parser(subparsers):
 
 def dataframe_action_parser(subparsers):
     parser = subparsers.add_parser("dataframe", help="Perform the creation of metadata.json file " +
-                                                               "for original and merged video referencing.")
+                                                     "for original and merged video referencing.")
     parser.add_argument("--subjects_dir", type=Path, help="Path to the subjects directory")
     parser.add_argument("--output_pickle", type=Path, default=None, help="Output path for the dataframe, " +
-                                                                                   "by default : " +
-                                                                                   " --subjects_dir/dataframe.pkl")
+                                                                         "by default : " +
+                                                                         " --subjects_dir/dataframe.pkl")
 
 
 def face_swap_benchmark_action_parser(subparsers):
     parser = subparsers.add_parser("face_swap_benchmark",
-                                             help="Perform benchmarking on all available SAEHD models.")
+                                   help="Perform benchmarking on all available SAEHD models.")
     parser.add_argument("--subjects_dir", type=Path, help="Path to the subjects directory")
     parser.add_argument("--subject_src_id", type=int, help="Id of source subject to perform benchmark.")
     parser.add_argument("--subject_dst_id", type=int, help="Id of destination subject to perform benchmark.")
     parser.add_argument("--model_dir", type=Path, help="Path to the models directory")
     parser.add_argument("--benchmark_output_path_results", type=Path, help="Path to save the benchmark " +
-                                                                                     "results, the folder need to be " +
-                                                                                     "empty and does not need to " +
-                                                                                     "exists only the parent folder " +
-                                                                                     "needs to.")
+                                                                           "results, the folder need to be " +
+                                                                           "empty and does not need to " +
+                                                                           "exists only the parent folder " +
+                                                                           "needs to.")
     parser.add_argument("--iteration_goal", type=int, help="Integer of the last iteration to be performed.")
     parser.add_argument("--delta_iteration", type=int, help="Integer of the iterations between each " +
-                                                                      "benchmarking.")
+                                                            "benchmarking.")
 
 
 def swap_auto_action_parser(subparsers):
@@ -146,8 +146,8 @@ def swap_auto_action_parser(subparsers):
     parser.add_argument("--model_dir", type=Path, help="Path to the models directory")
     parser.add_argument("--model_name", type=str, default="", help="Name of the SAEHD model")
     parser.add_argument("--iteration_goal", type=int, default=None, help="Iteration to reach " +
-                                                                                   " for each face swapping " +
-                                                                                   "operation")
+                                                                         " for each face swapping " +
+                                                                         "operation")
 
 
 def pretrain_action_parser(subparsers):
