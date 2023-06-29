@@ -100,13 +100,12 @@ def swap_extract_action_parser(subparsers):
 
 
 def dataframe_action_parser(subparsers):
-    parser_dataframe = subparsers.add_parser("metadata_pack", help="Perform the creation of metadata.json file " +
-                                                                   "for original and merged video referencing.")
+    parser_dataframe = subparsers.add_parser("dataframe", help="Perform the creation of metadata.json file " +
+                                                               "for original and merged video referencing.")
     parser_dataframe.add_argument("--subjects_dir", type=Path, help="Path to the subjects directory")
     parser_dataframe.add_argument("--output_pickle", type=Path, default=None, help="Output path for the dataframe, " +
                                                                                    "by default : " +
                                                                                    " --subjects_dir/dataframe.pkl")
-    parser_dataframe.add_argument("--similarity_check", action='store_true', help="Verify images with SSHA256")
 
 
 def face_swap_benchmark_action_parser(subparsers):

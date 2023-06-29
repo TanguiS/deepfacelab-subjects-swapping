@@ -26,22 +26,20 @@ def save_asset(indexer: List[Dict[str, any]], output_pickle_dataframe_path: Path
 
 
 def load_asset(output_pickle_dataframe_path: Path, subjects_dir: Path
-               ) -> Tuple[Set[str], List[Dict[str, any]], List[Subject], int, int]:
+               ) -> Tuple[Set[str], List[Dict[str, any]], List[Subject]]:
     subjects = workspace.load_subjects(subjects_dir)
     indexer = []
     check_indexer = set()
-    real_count = 0
-    fake_count = 0
     if output_pickle_dataframe_path.exists() and output_pickle_dataframe_path.is_file():
         df: DataFrame = pd.read_pickle(output_pickle_dataframe_path)
         indexer = df.reset_index().to_dict(orient='records')
-        for item in tqdm(indexer, total=len(indexer), desc="Loading SHA256 asset...", unit=" Frame "):
-            check_indexer.add(sha256(item['frames']))
-            if item['label']:
-                fake_count += 1
-            else:
-                real_count += 1
-    return check_indexer, indexer, subjects, fake_count, real_count
+        check_indexer = set(df['sha256'])
+        print(
+            f"Dataframe information :\n" +
+            f" - number real frames : {sum(df['label'] == False)}\n" +
+            f" - number fake frames : {sum(df['label'] == True)}"
+        )
+    return check_indexer, indexer, subjects
 
 
 def sha256(image_path: Path) -> str:
@@ -57,36 +55,16 @@ def dataframe_value(
         frame: Union[Path, any],
         video: Union[Path, any],
         label: Union[bool, any],
-        original: Optional[Union[Path, any]] = None
+        original: Optional[Union[Path, any]] = None,
+        sha256_value: Optional[Union[Path, any]] = None
 ) -> Dict[str, any]:
     return {
         'frame': frame,
         'video': video,
         'label': label,
-        'original': original
+        'original': original,
+        'sha256': sha256_value
     }
-
-
-def put_items(
-        container: List[Dict[str, any]],
-        check_container: Set[str],
-        datas: List[Path],
-        root: Path,
-        video: Path,
-        label: bool,
-        original: Optional[Path] = None
-) -> None:
-    check_container = None
-    for frame in datas:
-        item = dataframe_value(
-            frame.relative_to(root),
-            video.relative_to(root),
-            label,
-            original.relative_to(root) if original else None
-        )
-        if any(d['frame'] == item['frame'] for d in container):
-            continue
-        container.append(item)
 
 
 def put_items_with_similarity_check(
@@ -99,51 +77,70 @@ def put_items_with_similarity_check(
         original: Optional[Path] = None
 ) -> None:
     for frame in datas:
+
+        if any(d['frame'] == frame.relative_to(root) for d in container):
+            continue
+
         sha256_result = sha256(frame)
+        if sha256_result in check_container:
+            continue
 
         item = dataframe_value(
             frame.relative_to(root),
             video.relative_to(root),
             label,
-            original.relative_to(root) if original else None
+            original.relative_to(root) if original else None,
+            sha256_result
         )
-
-        if sha256_result in check_container:
-            continue
-        if any(d['frame'] == item['frame'] for d in container):
-            continue
         container.append(item)
         check_container.add(sha256_result)
 
 
-def check_item()
-
 def add_data_augmentation_dataframe(
         subjects_dir: Path,
         container: List[Dict[str, any]],
-        check_container: Set[str],
-        putter: Union[put_items, put_items_with_similarity_check]):
-
+        check_container: Set[str]
+) -> None:
     print("Loading face to extract...")
-    face_frames = [
-        frame for frame in subjects_dir.joinpath(
-            WorkspaceStr.augmentation.value).joinpath(
-            WorkspaceStr.face.value).rglob("*.png")
-    ]
+
+    face_frames = []
+    for label_dir in (WorkspaceStr.fake_aug.value, WorkspaceStr.real_aug.value):
+        face_frames.extend([
+            frame for frame in subjects_dir.joinpath(
+                WorkspaceStr.augmentation.value).joinpath(
+                label_dir).joinpath(
+                WorkspaceStr.face.value).glob("*.png")
+        ])
+
     total = len(face_frames)
     for face in tqdm(face_frames, total=total, desc="Indexing face frames from data augmentation", unit=" image "):
+
+        if any(d['frame'] == face.relative_to(subjects_dir) for d in container):
+            continue
+
         original, label = specs_face_data_augmentation(face)
         try:
             original, label = decode_specs_data_augmentation(subjects_dir, original, label)
         except ValueError as e:
             print(e)
             continue
-        putter(container, check_container, f)
+
+        sha256_result = sha256(face)
+        if sha256_result in check_container:
+            continue
+
+        item = dataframe_value(
+            face.relative_to(subjects_dir),
+            face.relative_to(subjects_dir),
+            label,
+            sha256_value=sha256_result
+        )
+        container.append(item)
+        check_container.add(sha256_result)
 
 
-
-def create(subjects_dir: Path, output_pickle_dataframe_path: Path, similarity_check: bool = False) -> None:
-    check_indexer, indexer, subjects, fake_count, real_count = load_asset(output_pickle_dataframe_path, subjects_dir)
+def create(subjects_dir: Path, output_pickle_dataframe_path: Path) -> None:
+    check_indexer, indexer, subjects = load_asset(output_pickle_dataframe_path, subjects_dir)
 
     total = len(subjects) * (len(subjects) - 1) + len(subjects)
     progress_bar = tqdm(
@@ -152,15 +149,12 @@ def create(subjects_dir: Path, output_pickle_dataframe_path: Path, similarity_ch
         unit=" subject"
     )
 
-    putter = put_items
-    if similarity_check:
-        putter = put_items_with_similarity_check
+    putter = put_items_with_similarity_check
 
     for subject_src in subjects:
         face_frames = [frame for frame in subject_src.frame.face.frames_dir().glob("*.png")]
 
         putter(indexer, check_indexer, face_frames, subjects_dir, subject_src.video.original_video(), False)
-        real_count += len(face_frames)
         progress_bar.update(1)
 
         for subject_dst in subjects:
@@ -180,14 +174,15 @@ def create(subjects_dir: Path, output_pickle_dataframe_path: Path, similarity_ch
                 True,
                 subject_src.video.original_video()
             )
-            fake_count += len(merged_face_frames)
             progress_bar.update(1)
+
+        save_asset(indexer, output_pickle_dataframe_path)
 
     progress_bar.close()
 
+    add_data_augmentation_dataframe(subjects_dir, indexer, check_indexer)
+
     save_asset(indexer, output_pickle_dataframe_path)
-
-
 
 
 if __name__ == "__main__":

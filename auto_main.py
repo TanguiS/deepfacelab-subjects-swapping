@@ -143,12 +143,11 @@ def workspace_setup(args: Dict[str, any]):
 
 def dataframe_creation(
         subjects_dir: Path,
-        output_pickle: Optional[Path] = None,
-        similarity_check: bool = False
+        output_pickle: Optional[Path] = None
 ) -> None:
     if output_pickle is None:
         output_pickle = subjects_dir.joinpath("dataframe.pkl")
-    dataframe.create(subjects_dir, output_pickle, similarity_check)
+    dataframe.create(subjects_dir, output_pickle)
 
 
 def extract_face_from_subject(subjects_dir: Path, model_dir: Path, input_shape: int, max_shape: int) -> None:
@@ -171,7 +170,6 @@ def extract_face_from_video_data_augmentation(
     face_detector = load_face_detection_model(model_dir, input_size=shape)
     random_data_augmentation.launch_video_extract_frames(subjects_dir)
     random_data_augmentation.launch_face_extract_frames(subjects_dir, face_detector, max_shape)
-
 
 
 if __name__ == '__main__':
@@ -208,7 +206,7 @@ if __name__ == '__main__':
             'iteration_goal',
             'delta_iteration'
         }),
-        "metadata_pack": (dataframe_creation, {'subjects_dir', 'output_pickle'}),
+        "dataframe": (dataframe_creation, {'subjects_dir', 'output_pickle'}),
         "extract_face_from_subject": (extract_face_from_subject, {
             'subjects_dir',
             'model_dir',

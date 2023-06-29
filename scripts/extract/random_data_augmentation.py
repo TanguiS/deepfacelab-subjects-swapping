@@ -100,7 +100,7 @@ def decode_specs_data_augmentation(subjects_dir: Path, original_video_stem: str,
     except IndexError:
         raise ValueError(f"Video : {original_video_stem} does not exists, frame will be skipped")
 
-    label = False if label == WorkspaceStr.fake_aug.value else True
+    label = True if label == WorkspaceStr.fake_aug.value else False
     return original_video_path, label
 
 
