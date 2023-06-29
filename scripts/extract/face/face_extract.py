@@ -11,7 +11,7 @@ from scripts.Subject import Subject
 from scripts.extract.face.FaceDetectorResult import face_detection_single_frame, FaceDetectorResult, \
     load_face_detection_model
 from scripts.extract.face.face_align import norm_crop, rezize_from_max_length
-from scripts.extract.face.pythonScriptFunctions import load_model
+from scripts.extract.face.yunet_scripts import load_model
 from scripts.extract.face.yunet import YuNet
 
 

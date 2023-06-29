@@ -2,11 +2,30 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional, Tuple
+import mxnet as mx
 
 import cv2
 import numpy as np
+from mxnet.module import Module
 
 from scripts.extract.face.yunet import YuNet
+
+
+def load_face_features_extraction_model(model_dir: Path) -> Module:
+    sym, arg_params, aux_params = mx.model.load_checkpoint(str(model_dir) + '\\', 0)
+    all_layers = sym.get_internals()
+    ##if we want bach normalization features:
+    # symbn1 = all_layers['bn1_output']
+    symbn1 = all_layers['fc1_output']
+    ctx = mx.cpu()
+    model = mx.mod.Module(symbol=symbn1, context=ctx, label_names=None)
+    data_shape = (1, 3) + (112, 112)
+    model.bind(data_shapes=[('data', data_shape)])
+    model.set_params(arg_params, aux_params)
+    data = mx.nd.zeros(shape=data_shape)
+    db = mx.io.DataBatch(data=(data,))
+    model.forward(db, is_train=False)
+    return model
 
 
 def load_face_detection_model(

@@ -172,6 +172,27 @@ def extract_face_from_video_data_augmentation(
     random_data_augmentation.launch_face_extract_frames(subjects_dir, face_detector, max_shape)
 
 
+def frames_generated_benchmark(
+        subjects_dir: Path,
+        model_dir: Path,
+        input_shape: int,
+        max_shape: int,
+        min_threshold: int,
+        confidence_percentage: int
+) -> None:
+    from scripts.extract.face.FaceDetectorResult import load_face_detection_model
+    from scripts.extract.face.FaceDetectorResult import load_face_features_extraction_model
+    import scripts.benchmark.frames_generated_benchmark as bench
+
+    shape = (input_shape, input_shape)
+    subjects = workspace.load_subjects(subjects_dir)
+    face_detector = load_face_detection_model(model_dir, input_size=shape)
+    features_extraction_model = load_face_features_extraction_model(model_dir)
+    bench.bench_merged_frames_efficiencies(
+        subjects, face_detector, features_extraction_model, max_shape, min_threshold, confidence_percentage
+    )
+
+
 if __name__ == '__main__':
     import multiprocessing
 
@@ -217,6 +238,14 @@ if __name__ == '__main__':
             'model_dir',
             'input_shape',
             'max_shape'
+        }),
+        "frames_generated_benchmark": (frames_generated_benchmark, {
+            'subjects_dir',
+            'model_dir',
+            'input_shape',
+            'max_shape',
+            'min_threshold',
+            'confidence_percentage'
         })
     }
 
