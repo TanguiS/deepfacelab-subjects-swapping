@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import List, Dict, Optional, Set, Tuple, Union
 
+import cv2
 import pandas as pd
 import hashlib
 
@@ -55,6 +56,7 @@ def dataframe_value(
         frame: Union[Path, any],
         video: Union[Path, any],
         label: Union[bool, any],
+        img_face_size: int,
         original: Optional[Union[Path, any]] = None,
         sha256_value: Optional[Union[Path, any]] = None
 ) -> Dict[str, any]:
@@ -63,7 +65,11 @@ def dataframe_value(
         'video': video,
         'label': label,
         'original': original,
-        'sha256': sha256_value
+        'sha256': sha256_value,
+        'left': 0,
+        'top': 0,
+        'right': img_face_size,
+        'bottom': img_face_size
     }
 
 
@@ -74,6 +80,7 @@ def put_items_with_similarity_check(
         root: Path,
         video: Path,
         label: bool,
+        img_face_size: int,
         original: Optional[Path] = None
 ) -> None:
     for frame in datas:
@@ -89,6 +96,7 @@ def put_items_with_similarity_check(
             frame.relative_to(root),
             video.relative_to(root),
             label,
+            img_face_size,
             original.relative_to(root) if original else None,
             sha256_result
         )
@@ -153,8 +161,12 @@ def create(subjects_dir: Path, output_pickle_dataframe_path: Path) -> None:
 
     for subject_src in subjects:
         face_frames = [frame for frame in subject_src.frame.face.frames_dir().glob("*.png")]
+        img_face_size = cv2.imread(face_frames[0], cv2.IMREAD_UNCHANGED).shape[1]
 
-        putter(indexer, check_indexer, face_frames, subjects_dir, subject_src.video.original_video(), False)
+        putter(
+            indexer, check_indexer, face_frames, subjects_dir, subject_src.video.original_video(), False, img_face_size
+        )
+        del img_face_size
         progress_bar.update(1)
 
         for subject_dst in subjects:
@@ -164,6 +176,7 @@ def create(subjects_dir: Path, output_pickle_dataframe_path: Path) -> None:
             merged_face_frames = [
                 frame for frame in subject_src.frame.face.frames_dir_from(subject_dst.id()).glob("*.png")
             ]
+            img_face_size = cv2.imread(merged_face_frames[0], cv2.IMREAD_UNCHANGED).shape[1]
 
             putter(
                 indexer,
@@ -172,8 +185,10 @@ def create(subjects_dir: Path, output_pickle_dataframe_path: Path) -> None:
                 subjects_dir,
                 subject_src.video.merged_videos_from_subject_id(subject_dst.id()),
                 True,
+                img_face_size,
                 subject_src.video.original_video()
             )
+            del img_face_size
             progress_bar.update(1)
 
         save_asset(indexer, output_pickle_dataframe_path)
