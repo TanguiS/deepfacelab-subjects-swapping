@@ -4,8 +4,29 @@ from pathlib import Path
 import cv2
 import mxnet as mx
 import numpy as np
+from mxnet.module import Module
 from sklearn import svm, metrics
 from sklearn.preprocessing import normalize
+
+
+def load_face_features_extraction_model(model_dir: Path) -> Module:
+    if not model_dir.exists() or not model_dir.is_dir():
+        raise NotADirectoryError
+    str_path = str(model_dir) + '/'
+    sym, arg_params, aux_params = mx.model.load_checkpoint(str_path, 0)
+    all_layers = sym.get_internals()
+    ##if we want bach normalization features:
+    # symbn1 = all_layers['bn1_output']
+    symbn1 = all_layers['fc1_output']
+    ctx = mx.cpu()
+    model = mx.mod.Module(symbol=symbn1, context=ctx, label_names=None)
+    data_shape = (1, 3) + (112, 112)
+    model.bind(data_shapes=[('data', data_shape)])
+    model.set_params(arg_params, aux_params)
+    data = mx.nd.zeros(shape=data_shape)
+    db = mx.io.DataBatch(data=(data,))
+    model.forward(db, is_train=False)
+    return model
 
 
 def get_embedding(model, img):

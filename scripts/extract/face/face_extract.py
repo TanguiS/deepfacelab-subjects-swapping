@@ -1,4 +1,3 @@
-import math
 from pathlib import Path
 from typing import List
 
@@ -8,10 +7,8 @@ from numpy import ndarray
 from tqdm import tqdm
 
 from scripts.Subject import Subject
-from scripts.extract.face.FaceDetectorResult import face_detection_single_frame, FaceDetectorResult, \
-    load_face_detection_model
+from scripts.extract.face.FaceDetectorResult import face_detection_single_frame, FaceDetectorResult
 from scripts.extract.face.face_align import norm_crop, rezize_from_max_length
-from scripts.extract.face.yunet_scripts import load_model
 from scripts.extract.face.yunet import YuNet
 
 
@@ -28,6 +25,8 @@ def pre_processing_image(
 
 def extract_face(image_path: Path, face_detector_model: YuNet, max_shape: int = 112) -> ndarray:
     image_cv2_probe = cv2.imread(str(image_path))
+    if image_cv2_probe is None:
+        raise ValueError
     image_cv2_probe_resized, ratio_value_probe = rezize_from_max_length(image_cv2_probe, max_shape)
     face_detection: FaceDetectorResult = face_detection_single_frame(image_cv2_probe_resized, face_detector_model)
     return pre_processing_image(face_detection, image_cv2_probe, ratio_value_probe, max_shape)

@@ -137,10 +137,13 @@ def add_data_augmentation_dataframe(
         if sha256_result in check_container:
             continue
 
+        img_face_size = cv2.imread(str(face), cv2.IMREAD_UNCHANGED).shape[1]
+
         item = dataframe_value(
             face.relative_to(subjects_dir),
             face.relative_to(subjects_dir),
             label,
+            img_face_size,
             sha256_value=sha256_result
         )
         container.append(item)
@@ -161,7 +164,7 @@ def create(subjects_dir: Path, output_pickle_dataframe_path: Path) -> None:
 
     for subject_src in subjects:
         face_frames = [frame for frame in subject_src.frame.face.frames_dir().glob("*.png")]
-        img_face_size = cv2.imread(face_frames[0], cv2.IMREAD_UNCHANGED).shape[1]
+        img_face_size = cv2.imread(str(face_frames[0]), cv2.IMREAD_UNCHANGED).shape[1]
 
         putter(
             indexer, check_indexer, face_frames, subjects_dir, subject_src.video.original_video(), False, img_face_size
@@ -176,7 +179,7 @@ def create(subjects_dir: Path, output_pickle_dataframe_path: Path) -> None:
             merged_face_frames = [
                 frame for frame in subject_src.frame.face.frames_dir_from(subject_dst.id()).glob("*.png")
             ]
-            img_face_size = cv2.imread(merged_face_frames[0], cv2.IMREAD_UNCHANGED).shape[1]
+            img_face_size = cv2.imread(str(merged_face_frames[0]), cv2.IMREAD_UNCHANGED).shape[1]
 
             putter(
                 indexer,
@@ -198,10 +201,3 @@ def create(subjects_dir: Path, output_pickle_dataframe_path: Path) -> None:
     add_data_augmentation_dataframe(subjects_dir, indexer, check_indexer)
 
     save_asset(indexer, output_pickle_dataframe_path)
-
-
-if __name__ == "__main__":
-    sub_path = Path('D:\\storage-photos\\subjects')
-    out_path = Path('D:\\storage-photos\\subjects\\output.pkl')
-
-    create(sub_path, out_path)

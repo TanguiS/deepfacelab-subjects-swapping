@@ -53,11 +53,7 @@ def frames_generated_benchmark_action_parser(subparsers):
     parser.add_argument("--subjects_dir", type=Path, help="Path to the subjects directory")
     parser.add_argument("--model_dir", type=Path, help="Path to the onxx models directory for YuNet class and Mxnet "
                                                        "Module")
-    parser.add_argument("--input_shape", type=int,
-                        help="Square shape of the input YuNet class for face extraction")
-    parser.add_argument("--max_shape", type=int,
-                        help="Shape of the output faces, should be less than shape")
-    parser.add_argument("--min_threshold", type=int, help="Minimum value to consider a face as recognized.")
+    parser.add_argument("--min_threshold", type=float, help="Minimum value to consider a face as recognized: [0, 1].")
     parser.add_argument("--confidence_percentage", type=float, help="Confidence level of face recognition: [0, 1]")
 
 

@@ -6,7 +6,7 @@
     <envs>
       <env name="PYTHONUNBUFFERED" value="1" />
     </envs>
-    <option name="SDK_HOME" value="C:\Users\tangu\anaconda3\envs\deepfacelab\python.exe" />
+    <option name="SDK_HOME" value="$USER_HOME$/anaconda3/envs/deepfacelab/bin/python" />
     <option name="SDK_NAME" value="deepfacelab" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
     <option name="IS_MODULE_SDK" value="false" />
